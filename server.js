@@ -274,7 +274,7 @@ async function handleFile(file){
     } else {
       setStat('s-medidas', pxW+' × '+pxH+' px (sin DPI)');
       setStat('s-dpi','No en metadatos','warn');
-      document.getElementById('sb-dim').textContent=pxW+' × '+pxH+' px');
+      document.getElementById('sb-dim').textContent=pxW+' × '+pxH+' px';
     }
   }
 
