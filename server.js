@@ -591,14 +591,12 @@ app.post("/analizar", upload.single("archivo"), async (req, res) => {
     if (cmAncho && cmAlto) contextoDimensiones = `Dimensiones verificadas por el navegador: ${cmAncho} × ${cmAlto} cm (${mmAncho} × ${mmAlto} mm${pxAncho ? `, ${pxAncho} × ${pxAlto} px` : ""})${dpiMeta ? `, DPI real: ${dpiMeta}` : ""}.`;
     else if (pxAncho && pxAlto) contextoDimensiones = `Dimensiones en píxeles: ${pxAncho} × ${pxAlto} px${dpiMeta ? `, DPI: ${dpiMeta}` : " (sin DPI en metadatos)"}.`;
 
-    const systemPrompt = `Eres un experto preflight de imprenta con 20 años de experiencia. Analizas archivos para tarjetas, flyers, volantes y libros/revistas. Responde ÚNICAMENTE con JSON válido sin backticks.
-
-IMPORTANTE SOBRE MEDIDAS: ${contextoDimensiones || "No se pudieron leer las dimensiones desde el navegador."} Usa estos valores exactos en el campo tamanio — NO los reinterpretes ni cambies.
-
-DETECCIÓN DE TEXTOS: Rasterizadas: analiza nitidez de bordes. PDF: detecta texto seleccionable vs paths. Vectoriales: busca texto sin convertir.
-
-JSON exacto:
-{"resolucion":{"valor_dpi":${dpiMeta||"null"},"fuente":"${dpiMeta?"metadatos_navegador":"no_determinable"}","estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","hay_texto":null,"estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":${pxAncho||"null"},"px_alto":${pxAlto||"null"},"mm_ancho":${mmAncho||"null"},"mm_alto":${mmAlto||"null"},"cm_ancho":${cmAncho||"null"},"cm_alto":${cmAlto||"null"},"detalle":""},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}`;
+    const systemPrompt = `Experto preflight imprenta. Responde SOLO JSON sin texto extra.
+Medidas del archivo (ya verificadas): ${contextoDimensiones||"no disponibles"}.
+Analiza: modo color, textos trazados, sangría, cruces de corte, transparencias, perfil ICC, calidad.
+Para textos: rasterizadas=bordes nítidos o pixelados; PDF=texto seleccionable vs paths; vector=texto sin trazar.
+Devuelve exactamente:
+{"resolucion":{"valor_dpi":${dpiMeta||"null"},"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":${pxAncho||"null"},"px_alto":${pxAlto||"null"},"mm_ancho":${mmAncho||"null"},"mm_alto":${mmAlto||"null"},"cm_ancho":${cmAncho||"null"},"cm_alto":${cmAlto||"null"}},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}`;
 
     let userContent;
     if (esVisual || esPDF) {
