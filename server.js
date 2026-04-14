@@ -512,7 +512,7 @@ function readPDFDims(file){
     reader.onload=e=>{
       try{
         const text=e.target.result;
-        const match=text.match(/MediaBox\s*\[\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\]/);
+        const match=text.match(/MediaBox[^[]*\[[^\]]*([\d.]+)[^\d]+([\d.]+)[^\d]+([\d.]+)[^\d]+([\d.]+)/);
         if(match){
           const w=parseFloat(match[3])-parseFloat(match[1]);
           const h=parseFloat(match[4])-parseFloat(match[2]);
