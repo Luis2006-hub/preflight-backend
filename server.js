@@ -306,18 +306,20 @@ async function loadFile(file) {
     thumbEl.innerHTML = '<div class="sqt-ext">' + curExt.toUpperCase() + '</div>';
     if (curExt === 'pdf') {
       try {
-        const pd = await getPDFDims(file);
-        if (pd) {
-          curMmW = pd.mmW; curMmH = pd.mmH;
-          curCmW = pd.cmW; curCmH = pd.cmH;
-        }
-      } catch (e) { console.warn('getPDFDims:', e); }
-      try {
+        // Una sola lectura del PDF: dimensiones + páginas + miniatura
         const buf = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
         curPages = pdf.numPages;
-        // Renderizar miniatura de primera página
+
+        // Leer dimensiones de la primera página (en puntos PDF, 1pt = 25.4/72 mm)
         const page = await pdf.getPage(1);
+        const vp1 = page.getViewport({ scale: 1 });
+        curMmW = Math.round(vp1.width * (25.4 / 72));
+        curMmH = Math.round(vp1.height * (25.4 / 72));
+        curCmW = parseFloat((curMmW / 10).toFixed(1));
+        curCmH = parseFloat((curMmH / 10).toFixed(1));
+
+        // Renderizar miniatura
         const vp = page.getViewport({ scale: 0.3 });
         const canvas = document.createElement('canvas');
         canvas.width = vp.width;
@@ -328,7 +330,7 @@ async function loadFile(file) {
         await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
         thumbEl.innerHTML = '';
         thumbEl.appendChild(canvas);
-      } catch (e) { console.warn('pdf pages:', e); }
+      } catch (e) { console.warn('PDF processing:', e); }
     }
   }
 
