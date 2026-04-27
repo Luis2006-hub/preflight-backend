@@ -429,9 +429,12 @@ async function loadFile(file) {
       thumbEl.innerHTML = '';
       thumbEl.appendChild(canvas);
 
-      // Guardar el documento PDF YA CARGADO (no el buffer) para reusarlo
+      // Guardar UNA COPIA INDEPENDIENTE del buffer (ArrayBuffer no Uint8Array)
+      // para poder reusarlo en el visor grande sin problemas de transferencia
+      const copyBuffer = new ArrayBuffer(pdfBuffer.byteLength);
+      new Uint8Array(copyBuffer).set(new Uint8Array(pdfBuffer));
       window._aiHasPDFPreview = true;
-      window._aiPdfDoc = pdf;
+      window._aiPdfBufferCopy = copyBuffer;
       window._aiPdfPages = pdf.numPages;
     } catch (e) {
       console.warn('AI/EPS preview falló:', e);
@@ -594,10 +597,12 @@ async function renderPrev() {
   if (curExt === 'pdf' || ((curExt === 'ai' || curExt === 'eps') && window._aiHasPDFPreview)) {
     try {
       let pdf, total;
-      if ((curExt === 'ai' || curExt === 'eps') && window._aiPdfDoc) {
-        // Reusar el documento ya cargado en loadFile
-        pdf = window._aiPdfDoc;
-        total = Math.min(window._aiPdfPages, 10);
+      if ((curExt === 'ai' || curExt === 'eps') && window._aiPdfBufferCopy) {
+        // Crear copia fresca del buffer y cargar nuevo documento
+        const freshCopy = new ArrayBuffer(window._aiPdfBufferCopy.byteLength);
+        new Uint8Array(freshCopy).set(new Uint8Array(window._aiPdfBufferCopy));
+        pdf = await pdfjsLib.getDocument({ data: freshCopy }).promise;
+        total = Math.min(pdf.numPages, 10);
       } else {
         const bufToUse = await curFile.arrayBuffer();
         pdf = await pdfjsLib.getDocument({ data: bufToUse }).promise;
@@ -833,7 +838,7 @@ function resetAll() {
   curMmW = null; curMmH = null; curCmW = null; curCmH = null;
   targetSize = null; curPages = 1;
   if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
-  window._aiPdfDoc = null;
+  window._aiPdfBufferCopy = null;
   window._aiHasPDFPreview = false;
   window._pdfDoc = null;
 }
