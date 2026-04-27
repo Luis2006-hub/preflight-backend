@@ -444,20 +444,27 @@ async function renderPDFPages() {
   if (!window._pdfDoc) return;
   const cont = document.getElementById('pdf-prev');
   if (!cont) return;
-  // Renderizar en alta resolución (scale 2.5x) para nitidez en pantallas HiDPI
-  const dpr = window.devicePixelRatio || 1;
-  const renderScale = Math.max(2.5, dpr * 2);
+  // Render en alta resolución para nitidez perfecta
+  // Técnica: buffer interno de alta resolución + display scaled down via CSS
+  const displayScale = 2;       // tamaño visual respecto al PDF original
+  const renderMultiplier = 2.5; // multiplicador de calidad interna
+  const internalScale = displayScale * renderMultiplier;
+
   for (let p = 1; p <= window._pdfPages; p++) {
     const page = await window._pdfDoc.getPage(p);
-    const vp = page.getViewport({ scale: renderScale });
+    const internalVp = page.getViewport({ scale: internalScale });
+    const displayVp = page.getViewport({ scale: displayScale });
+
     const canvas = document.createElement('canvas');
-    canvas.width = vp.width;
-    canvas.height = vp.height;
-    // Mostrar al tamaño visual normal — el navegador escalará el canvas hi-res hacia abajo
+    // Buffer interno alta resolución
+    canvas.width = internalVp.width;
+    canvas.height = internalVp.height;
+    // Display al tamaño visual deseado (CSS escala hacia abajo = nitidez perfecta)
+    canvas.style.width = displayVp.width + 'px';
+    canvas.style.height = displayVp.height + 'px';
     canvas.style.maxWidth = '100%';
-    canvas.style.width = (vp.width / renderScale * 1.4) + 'px';
-    canvas.style.height = 'auto';
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: internalVp }).promise;
     cont.appendChild(canvas);
   }
 }
