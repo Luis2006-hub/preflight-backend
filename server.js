@@ -74,6 +74,7 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .cust-l{font-size:13px;color:#6b7088;font-weight:500;}
 .cust-i{width:90px;padding:9px 11px;border:1px solid #c5cad9;border-radius:7px;font-size:13px;font-family:inherit;background:white;}
 .cust-i:focus{outline:none;border-color:#1a3eb8;}
+.cust-hint{font-size:11px;color:#6b7088;width:100%;margin-top:6px;font-style:italic;}
 
 .acts{display:flex;gap:10px;flex-wrap:wrap;}
 .bt{padding:11px 20px;border-radius:8px;border:1px solid #c5cad9;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#1a1d2e;font-family:inherit;}
@@ -175,6 +176,7 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
       <span style="color:#6b7088">x</span>
       <input type="number" class="cust-i" id="ch" placeholder="alto" step="0.1">
       <span style="color:#6b7088">cm</span>
+      <span class="cust-hint">Ingresa solo una medida, la otra se calcula proporcionalmente</span>
     </div>
     <div class="acts">
       <button class="bt bt-pr" id="btn-analyze">Analizar archivo</button>
@@ -243,6 +245,39 @@ function init() {
 
   document.getElementById('btn-analyze').addEventListener('click', continueAn);
   document.getElementById('btn-skip').addEventListener('click', skipSize);
+
+  // Auto-calcular medida proporcional cuando el usuario ingresa una sola
+  const cwInput = document.getElementById('cw');
+  const chInput = document.getElementById('ch');
+
+  function getAspectRatio() {
+    // Usar la proporción real del archivo (ancho/alto)
+    if (curCmW && curCmH) return curCmW / curCmH;
+    if (curMmW && curMmH) return curMmW / curMmH;
+    if (curPxW && curPxH) return curPxW / curPxH;
+    return null;
+  }
+
+  cwInput.addEventListener('input', () => {
+    const ratio = getAspectRatio();
+    const w = parseFloat(cwInput.value);
+    if (ratio && w > 0) {
+      // Calcular alto proporcional
+      chInput.value = (w / ratio).toFixed(1);
+      // Quitar selección de presets si los hay
+      document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+    }
+  });
+
+  chInput.addEventListener('input', () => {
+    const ratio = getAspectRatio();
+    const h = parseFloat(chInput.value);
+    if (ratio && h > 0) {
+      // Calcular ancho proporcional
+      cwInput.value = (h * ratio).toFixed(1);
+      document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
+    }
+  });
 }
 
 function fb(b) {
@@ -476,27 +511,24 @@ async function renderPDFPages() {
   if (!window._pdfDoc) return;
   const cont = document.getElementById('pdf-prev');
   if (!cont) return;
-  // Render en alta resolución para nitidez perfecta
-  // Técnica: buffer interno de alta resolución + display scaled down via CSS
-  const displayScale = 2;       // tamaño visual respecto al PDF original
-  const renderMultiplier = 2.5; // multiplicador de calidad interna
-  const internalScale = displayScale * renderMultiplier;
+  // Render en alta resolución manteniendo proporciones exactas del archivo
+  const internalScale = 3; // calidad interna alta para nitidez en HiDPI
 
   for (let p = 1; p <= window._pdfPages; p++) {
     const page = await window._pdfDoc.getPage(p);
-    const internalVp = page.getViewport({ scale: internalScale });
-    const displayVp = page.getViewport({ scale: displayScale });
+    const vp = page.getViewport({ scale: internalScale });
 
     const canvas = document.createElement('canvas');
-    // Buffer interno alta resolución
-    canvas.width = internalVp.width;
-    canvas.height = internalVp.height;
-    // Display al tamaño visual deseado (CSS escala hacia abajo = nitidez perfecta)
-    canvas.style.width = displayVp.width + 'px';
-    canvas.style.height = displayVp.height + 'px';
-    canvas.style.maxWidth = '100%';
+    canvas.width = vp.width;
+    canvas.height = vp.height;
 
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport: internalVp }).promise;
+    // CSS: solo limitar ancho máximo, dejar que height se ajuste automáticamente
+    // Esto preserva las proporciones reales del archivo (no distorsiona)
+    canvas.style.maxWidth = '100%';
+    canvas.style.height = 'auto';
+    canvas.style.display = 'block';
+
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
     cont.appendChild(canvas);
   }
 }
