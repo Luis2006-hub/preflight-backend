@@ -220,6 +220,7 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/psd@3.4.0/dist/psd.min.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const BACKEND = 'https://preflight-backend-production-e718.up.railway.app';
@@ -381,6 +382,19 @@ async function loadFile(file) {
         curCmH = parseFloat((curMmH / 10).toFixed(1));
       }
     } catch (e) { console.warn('getPSDDims:', e); }
+    // Renderizar miniatura usando psd.js
+    try {
+      if (typeof PSD !== 'undefined') {
+        const buf = await file.arrayBuffer();
+        const psdFile = new PSD(new Uint8Array(buf));
+        psdFile.parse();
+        const img = psdFile.image.toBase64();
+        // Guardar para usar en visor grande
+        window._psdPreviewURL = img;
+        // Mostrar miniatura
+        thumbEl.innerHTML = '<img src="' + img + '" alt="" style="max-width:100%;max-height:100%;object-fit:contain">';
+      }
+    } catch (e) { console.warn('psd.js render falló:', e); }
   } else if (curExt === 'ai' || curExt === 'eps') {
     thumbEl.innerHTML = '<div class="sqt-ext">' + curExt.toUpperCase() + '</div>';
     window._aiHasPDFPreview = false;
@@ -639,6 +653,13 @@ async function renderPrev() {
     } else {
       html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin-bottom:10px;opacity:0.4"><rect x="6" y="4" width="28" height="32" rx="3" stroke="currentColor" stroke-width="2"/><path d="M14 16h12M14 22h12M14 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div>' + (curExt.toUpperCase()) + ' sin vista previa embebida</div><div style="font-size:11px;margin-top:6px">Este archivo no incluye preview PDF. Para verlo, ábrelo en Illustrator o expórtalo como PDF.</div></div></div>';
     }
+  } else if (curExt === 'psd') {
+    // Para PSD, usar la imagen renderizada por psd.js
+    if (window._psdPreviewURL) {
+      html.dataset.prev = '<div class="preview"><img src="' + window._psdPreviewURL + '" alt=""></div>';
+    } else {
+      html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin-bottom:10px;opacity:0.4"><rect x="6" y="4" width="28" height="32" rx="3" stroke="currentColor" stroke-width="2"/><path d="M14 16h12M14 22h12M14 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div>PSD sin vista previa</div><div style="font-size:11px;margin-top:6px">Para verlo, ábrelo en Photoshop o expórtalo como PNG/JPG.</div></div></div>';
+    }
   } else {
     if (!curURL) curURL = URL.createObjectURL(curFile);
     html.dataset.prev = '<div class="preview"><img src="' + curURL + '" alt=""></div>';
@@ -863,6 +884,7 @@ function resetAll() {
   window._aiPdfBufferCopy = null;
   window._aiHasPDFPreview = false;
   window._pdfDoc = null;
+  window._psdPreviewURL = null;
 }
 
 function getDims(file) {
