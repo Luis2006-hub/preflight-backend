@@ -656,27 +656,25 @@ function getDPI(file) {
   });
 }
 
-function getPDFDims(file) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const txt = e.target.result;
-        const idx = txt.indexOf('MediaBox');
-        if (idx < 0) { resolve(null); return; }
-        const chunk = txt.slice(idx, idx + 80);
-        const nums = chunk.match(/[-\d.]+/g);
-        if (nums && nums.length >= 4) {
-          const w = parseFloat(nums[2]) - parseFloat(nums[0]);
-          const h = parseFloat(nums[3]) - parseFloat(nums[1]);
-          const mmW = Math.round(w * (25.4 / 72));
-          const mmH = Math.round(h * (25.4 / 72));
-          resolve({ mmW, mmH, cmW: parseFloat((mmW / 10).toFixed(1)), cmH: parseFloat((mmH / 10).toFixed(1)) });
-        } else resolve(null);
-      } catch (e) { resolve(null); }
-    };
-    reader.readAsText(file.slice(0, 65536));
-  });
+async function getPDFDims(file) {
+  // Usar PDF.js para leer dimensiones de la primera página de forma confiable
+  try {
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+    const page = await pdf.getPage(1);
+    const vp = page.getViewport({ scale: 1 });
+    // PDF.js da el viewport en puntos PDF (1pt = 1/72 inch = 25.4/72 mm)
+    const w = vp.width;
+    const h = vp.height;
+    const mmW = Math.round(w * (25.4 / 72));
+    const mmH = Math.round(h * (25.4 / 72));
+    const cmW = parseFloat((mmW / 10).toFixed(1));
+    const cmH = parseFloat((mmH / 10).toFixed(1));
+    return { mmW, mmH, cmW, cmH, ptW: Math.round(w), ptH: Math.round(h) };
+  } catch (e) {
+    console.warn('getPDFDims con PDF.js falló:', e);
+    return null;
+  }
 }
 
 function getPSDDims(file) {
