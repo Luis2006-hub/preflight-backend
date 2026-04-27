@@ -300,16 +300,39 @@ function fb(b) {
   return (b / 1048576).toFixed(2) + ' MB';
 }
 
+let _currentPct = 0;
+let _targetPct = 0;
+let _progAnim = null;
+
 function step(p, m) {
-  // Actualizar texto de paso
   document.getElementById('anzs').textContent = m;
-  // Actualizar porcentaje grande
-  document.getElementById('prog-pct').textContent = Math.round(p) + '%';
-  // Actualizar arco SVG (radio 52, perímetro = 2 * PI * 52 ≈ 326.7)
+  _targetPct = p;
+  if (!_progAnim) {
+    _progAnim = setInterval(() => {
+      if (_currentPct < _targetPct) {
+        _currentPct = Math.min(_currentPct + 0.5, _targetPct);
+        updateProgressUI(_currentPct);
+      } else if (_currentPct >= 100) {
+        clearInterval(_progAnim);
+        _progAnim = null;
+      }
+    }, 30);
+  }
+}
+
+function updateProgressUI(pct) {
+  document.getElementById('prog-pct').textContent = Math.round(pct) + '%';
   const total = 326.7;
-  const offset = total - (total * p / 100);
+  const offset = total - (total * pct / 100);
   const arc = document.querySelector('.big-spin-arc');
   if (arc) arc.setAttribute('stroke-dashoffset', offset);
+}
+
+function resetProgress() {
+  _currentPct = 0;
+  _targetPct = 0;
+  if (_progAnim) { clearInterval(_progAnim); _progAnim = null; }
+  updateProgressUI(0);
 }
 
 async function loadFile(file) {
@@ -466,9 +489,25 @@ function szPick(btn, w, h) {
 }
 
 function continueAn() {
-  const w = parseFloat(document.getElementById('cw').value);
-  const h = parseFloat(document.getElementById('ch').value);
-  if (w && h) targetSize = { w, h };
+  const cwVal = document.getElementById('cw').value;
+  const chVal = document.getElementById('ch').value;
+  const w = parseFloat(cwVal);
+  const h = parseFloat(chVal);
+  if (w > 0 && h > 0) {
+    targetSize = { w: parseFloat(w.toFixed(1)), h: parseFloat(h.toFixed(1)) };
+  } else if (w > 0 || h > 0) {
+    // Solo una medida — calcular la otra desde proporción del archivo
+    const ratio = (curCmW && curCmH) ? curCmW / curCmH : (curPxW && curPxH ? curPxW / curPxH : null);
+    if (ratio) {
+      if (w > 0 && !h) {
+        targetSize = { w: parseFloat(w.toFixed(1)), h: parseFloat((w / ratio).toFixed(1)) };
+      } else if (h > 0 && !w) {
+        targetSize = { w: parseFloat((h * ratio).toFixed(1)), h: parseFloat(h.toFixed(1)) };
+      }
+    }
+  } else {
+    targetSize = null;
+  }
   startAnalysis();
 }
 
@@ -480,9 +519,14 @@ function skipSize() {
 async function startAnalysis() {
   document.getElementById('szq').style.display = 'none';
   document.getElementById('anz').style.display = 'block';
-  step(15, 'Renderizando vista previa...');
+  resetProgress();
+  step(8, 'Iniciando análisis...');
+  await new Promise(r => setTimeout(r, 200));
+  step(20, 'Renderizando vista previa...');
   await renderPrev();
-  step(50, 'Enviando a IA para análisis preflight...');
+  step(40, 'Preparando datos del archivo...');
+  await new Promise(r => setTimeout(r, 200));
+  step(55, 'Enviando a IA para análisis preflight...');
 
   try {
     const fd = new FormData();
@@ -496,11 +540,23 @@ async function startAnalysis() {
     if (curCmH) fd.append('cm_alto', curCmH);
     if (curPages) fd.append('paginas', curPages);
 
+    // Mientras esperamos respuesta del backend, ir avanzando el progreso poco a poco
+    let progressTick = 55;
+    const fetchProgress = setInterval(() => {
+      progressTick = Math.min(progressTick + 2, 88);
+      step(progressTick, 'IA analizando archivo...');
+    }, 800);
+
     const resp = await fetch(BACKEND + '/analizar', { method: 'POST', body: fd });
-    step(95, 'Generando reporte...');
+    clearInterval(fetchProgress);
+    step(92, 'Procesando resultado...');
+    await new Promise(r => setTimeout(r, 200));
+    step(98, 'Generando reporte...');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const data = await resp.json();
     if (!data.ok) throw new Error(data.error || 'Error');
+    step(100, 'Listo');
+    await new Promise(r => setTimeout(r, 300));
     showResults(data.analisis);
   } catch (err) {
     showError(err.message);
