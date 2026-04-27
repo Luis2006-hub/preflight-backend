@@ -444,13 +444,19 @@ async function renderPDFPages() {
   if (!window._pdfDoc) return;
   const cont = document.getElementById('pdf-prev');
   if (!cont) return;
+  // Renderizar en alta resolución (scale 2.5x) para nitidez en pantallas HiDPI
+  const dpr = window.devicePixelRatio || 1;
+  const renderScale = Math.max(2.5, dpr * 2);
   for (let p = 1; p <= window._pdfPages; p++) {
     const page = await window._pdfDoc.getPage(p);
-    const vp = page.getViewport({ scale: 1.3 });
+    const vp = page.getViewport({ scale: renderScale });
     const canvas = document.createElement('canvas');
     canvas.width = vp.width;
     canvas.height = vp.height;
+    // Mostrar al tamaño visual normal — el navegador escalará el canvas hi-res hacia abajo
     canvas.style.maxWidth = '100%';
+    canvas.style.width = (vp.width / renderScale * 1.4) + 'px';
+    canvas.style.height = 'auto';
     await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
     cont.appendChild(canvas);
   }
