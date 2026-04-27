@@ -207,7 +207,10 @@ const PRESETS = [
   { name: 'Tarjeta de visita', size: '5.5 x 8.5 cm', w: 5.5, h: 8.5 },
   { name: 'Postal / Volante', size: '10 x 15 cm', w: 10, h: 15 },
   { name: 'Flyer A5', size: '14.8 x 21 cm', w: 14.8, h: 21 },
+  { name: 'Hoja Carta', size: '21.6 x 27.9 cm', w: 21.6, h: 27.9 },
   { name: 'Hoja A4', size: '21 x 29.7 cm', w: 21, h: 29.7 },
+  { name: 'Hoja Oficio', size: '21.6 x 33 cm', w: 21.6, h: 33 },
+  { name: 'Doble Carta', size: '27.9 x 43.2 cm', w: 27.9, h: 43.2 },
   { name: 'Afiche A3', size: '29.7 x 42 cm', w: 29.7, h: 42 },
   { name: 'Poster A2', size: '42 x 59.4 cm', w: 42, h: 59.4 }
 ];
@@ -626,7 +629,16 @@ function showResults(d) {
   html += '<div class="cards">';
   html += '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div><div class="c-val">' + tamLabel + '</div><div class="c-sub">' + tamRef + '</div></div>';
   html += '<div class="card"><div class="c-head"><span class="c-label">Calidad</span><span class="c-pill ' + calStatus + '">' + (calStatus === 'p-ok' ? 'Apto' : calStatus === 'p-wn' ? 'Revisar' : 'Bajo') + '</span></div><div class="c-val">' + calLabel + '</div><div class="c-sub">' + calDetail + '</div></div>';
-  html += '<div class="card"><div class="c-head"><span class="c-label">Sangría</span><span class="c-pill ' + (sangria ? 'p-ok' : 'p-er') + '">' + (sangria ? 'Apto' : 'Falta') + '</span></div><div class="c-val">' + (sangria ? 'Con margen' : 'Sin margen') + '</div><div class="c-sub">' + (sangria ? 'Tu diseño no se cortará en el borde' : 'Agrega 3mm de fondo extra para evitar bordes blancos') + '</div></div>';
+    // Detectar cruces de corte y medida interna
+  const tieneCruces = (d.cruces_de_corte && d.cruces_de_corte.tiene) || false;
+  const medidaInterna = (d.cruces_de_corte && d.cruces_de_corte.medida_interna_cm) || null;
+  let sangriaSubtext = sangria ? 'Tu diseño no se cortará en el borde' : 'Agrega 3mm de fondo extra para evitar bordes blancos';
+  if (medidaInterna) {
+    sangriaSubtext = 'Medida final tras corte: <strong>' + medidaInterna + '</strong>' + (sangria ? '' : '. Falta sangría — agrega 3mm de fondo extra.');
+  } else if (tieneCruces) {
+    sangriaSubtext = 'Con cruces de corte. ' + sangriaSubtext;
+  }
+  html += '<div class="card"><div class="c-head"><span class="c-label">Sangría / Corte</span><span class="c-pill ' + (sangria ? 'p-ok' : 'p-er') + '">' + (sangria ? 'Apto' : 'Falta') + '</span></div><div class="c-val">' + (sangria ? 'Con margen' : 'Sin margen') + '</div><div class="c-sub">' + sangriaSubtext + '</div></div>';
   html += '<div class="card"><div class="c-head"><span class="c-label">Color</span><span class="c-pill ' + (colorOK ? 'p-ok' : 'p-wn') + '">' + (colorOK ? 'Apto' : 'Revisar') + '</span></div><div class="c-val">' + modoColor + '</div><div class="c-sub">' + (colorOK ? 'Configurado para imprenta' : 'Convertir a CMYK para colores fieles') + '</div></div>';
   html += '</div>';
 
@@ -843,7 +855,7 @@ async function handleAnalysis(req, res) {
     let ctx = "";
     if (cmAncho && cmAlto) ctx = "Medidas: " + cmAncho + "x" + cmAlto + " cm" + (dpiMeta ? ", DPI: " + dpiMeta : "") + ".";
 
-    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. IMPORTANTE para PDFs: los archivos profesionales mezclan texto vectorial nitido con imagenes de fondo rasterizadas (a veces con efectos artisticos pixelados intencionales). Si los textos y elementos importantes (logos, QR, numeros) estan nitidos, marca calidad como ALTA aunque el fondo decorativo se vea pixelado. Solo marca problema si todo el contenido principal es de baja resolucion. JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
+    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. IMPORTANTE para PDFs: los archivos profesionales mezclan texto vectorial nitido con imagenes de fondo rasterizadas (a veces con efectos artisticos pixelados intencionales). Si los textos y elementos importantes (logos, QR, numeros) estan nitidos, marca calidad como ALTA aunque el fondo decorativo se vea pixelado. Solo marca problema si todo el contenido principal es de baja resolucion. CRUCES DE CORTE: si el archivo tiene cruces de corte (lineas o marcas en las esquinas que indican donde cortar), calcula la MEDIDA INTERNA DEL CORTE en cm — la distancia entre las lineas de corte horizontales y verticales (es decir, el tamano final del producto despues de cortar, sin incluir sangria ni cruces). Reportalo en cruces_de_corte.medida_interna_cm como string ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"medida_interna_cm":null,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
 
     let userContent;
     if (esVisual || esPDF) {
