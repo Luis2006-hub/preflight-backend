@@ -391,7 +391,8 @@ async function loadFile(file) {
       // que puede empezar al inicio o después de algún offset.
       const bytes = new Uint8Array(buf);
       let pdfStart = -1;
-      for (let i = 0; i < Math.min(bytes.length - 5, 50000); i++) {
+      const searchLimit = Math.min(bytes.length - 5, 5000000); // hasta 5MB
+      for (let i = 0; i < searchLimit; i++) {
         if (bytes[i] === 0x25 && bytes[i+1] === 0x50 && bytes[i+2] === 0x44 && bytes[i+3] === 0x46 && bytes[i+4] === 0x2D) {
           pdfStart = i;
           break;
@@ -594,29 +595,50 @@ async function startAnalysis() {
 
 async function renderPrev() {
   const html = document.getElementById('results');
-  if (curExt === 'pdf' || ((curExt === 'ai' || curExt === 'eps') && window._aiHasPDFPreview)) {
+  if (curExt === 'pdf') {
     try {
-      let pdf, total;
-      if ((curExt === 'ai' || curExt === 'eps') && window._aiPdfBufferCopy) {
-        // Crear copia fresca del buffer y cargar nuevo documento
-        const freshCopy = new ArrayBuffer(window._aiPdfBufferCopy.byteLength);
-        new Uint8Array(freshCopy).set(new Uint8Array(window._aiPdfBufferCopy));
-        pdf = await pdfjsLib.getDocument({ data: freshCopy }).promise;
-        total = Math.min(pdf.numPages, 10);
-      } else {
-        const bufToUse = await curFile.arrayBuffer();
-        pdf = await pdfjsLib.getDocument({ data: bufToUse }).promise;
-        total = Math.min(pdf.numPages, 10);
-      }
+      const buf = await curFile.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const total = Math.min(pdf.numPages, 10);
       html.dataset.prev = '<div class="preview"><div class="preview-pdf" id="pdf-prev"></div></div>';
       window._pdfDoc = pdf;
       window._pdfPages = total;
     } catch (e) {
-      console.warn('renderPrev PDF falló:', e);
-      html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center">' + (curExt.toUpperCase()) + ' sin vista previa disponible<br><span style="font-size:11px">Para ver el archivo, ábrelo en Adobe Illustrator o expórtalo como PDF</span></div></div>';
+      html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center">No se pudo renderizar el PDF</div></div>';
     }
   } else if (curExt === 'ai' || curExt === 'eps') {
-    html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin-bottom:10px;opacity:0.4"><rect x="6" y="4" width="28" height="32" rx="3" stroke="currentColor" stroke-width="2"/><path d="M14 16h12M14 22h12M14 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div>' + (curExt.toUpperCase()) + ' sin vista previa embebida</div><div style="font-size:11px;margin-top:6px">Este archivo no incluye preview PDF. Para verlo, ábrelo en Illustrator o expórtalo como PDF.</div></div></div>';
+    // Para AI/EPS: buscar PDF embebido directamente desde el archivo (búsqueda completa)
+    let pdf = null, total = 0;
+    try {
+      const buf = await curFile.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      // Búsqueda completa del archivo, no solo primeros 50KB
+      let pdfStart = -1;
+      const searchLimit = Math.min(bytes.length - 5, 5000000); // hasta 5MB
+      for (let i = 0; i < searchLimit; i++) {
+        if (bytes[i] === 0x25 && bytes[i+1] === 0x50 && bytes[i+2] === 0x44 && bytes[i+3] === 0x46 && bytes[i+4] === 0x2D) {
+          pdfStart = i;
+          break;
+        }
+      }
+      if (pdfStart >= 0) {
+        // Crear copia limpia del buffer recortado
+        const sliced = buf.slice(pdfStart);
+        pdf = await pdfjsLib.getDocument({ data: sliced }).promise;
+        total = Math.min(pdf.numPages, 10);
+      }
+    } catch (e) {
+      console.warn('renderPrev AI/EPS falló:', e);
+      pdf = null;
+    }
+
+    if (pdf) {
+      html.dataset.prev = '<div class="preview"><div class="preview-pdf" id="pdf-prev"></div></div>';
+      window._pdfDoc = pdf;
+      window._pdfPages = total;
+    } else {
+      html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin-bottom:10px;opacity:0.4"><rect x="6" y="4" width="28" height="32" rx="3" stroke="currentColor" stroke-width="2"/><path d="M14 16h12M14 22h12M14 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div>' + (curExt.toUpperCase()) + ' sin vista previa embebida</div><div style="font-size:11px;margin-top:6px">Este archivo no incluye preview PDF. Para verlo, ábrelo en Illustrator o expórtalo como PDF.</div></div></div>';
+    }
   } else {
     if (!curURL) curURL = URL.createObjectURL(curFile);
     html.dataset.prev = '<div class="preview"><img src="' + curURL + '" alt=""></div>';
