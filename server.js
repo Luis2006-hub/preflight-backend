@@ -302,6 +302,36 @@ async function loadFile(file) {
         curCmH = parseFloat((curMmH / 10).toFixed(1));
       }
     } catch (e) { console.warn('getPSDDims:', e); }
+  } else if (curExt === 'ai' || curExt === 'eps') {
+    thumbEl.innerHTML = '<div class="sqt-ext">' + curExt.toUpperCase() + '</div>';
+    // Los archivos AI modernos tienen un PDF embebido. Intentamos cargarlos como PDF.
+    try {
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+      curPages = pdf.numPages;
+      const page = await pdf.getPage(1);
+      const vp1 = page.getViewport({ scale: 1 });
+      curMmW = Math.round(vp1.width * (25.4 / 72));
+      curMmH = Math.round(vp1.height * (25.4 / 72));
+      curCmW = parseFloat((curMmW / 10).toFixed(1));
+      curCmH = parseFloat((curMmH / 10).toFixed(1));
+      // Renderizar miniatura
+      const vp = page.getViewport({ scale: 0.3 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width;
+      canvas.height = vp.height;
+      canvas.style.maxWidth = '100%';
+      canvas.style.maxHeight = '100%';
+      canvas.style.objectFit = 'contain';
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      thumbEl.innerHTML = '';
+      thumbEl.appendChild(canvas);
+      // Marcar que tiene preview PDF para poder mostrarlo en el visor principal
+      window._aiHasPDFPreview = true;
+    } catch (e) {
+      console.warn('AI/EPS sin PDF embebido:', e);
+      window._aiHasPDFPreview = false;
+    }
   } else {
     thumbEl.innerHTML = '<div class="sqt-ext">' + curExt.toUpperCase() + '</div>';
     if (curExt === 'pdf') {
@@ -423,7 +453,7 @@ async function startAnalysis() {
 
 async function renderPrev() {
   const html = document.getElementById('results');
-  if (curExt === 'pdf') {
+  if (curExt === 'pdf' || ((curExt === 'ai' || curExt === 'eps') && window._aiHasPDFPreview)) {
     try {
       const buf = await curFile.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
@@ -432,8 +462,10 @@ async function renderPrev() {
       window._pdfDoc = pdf;
       window._pdfPages = total;
     } catch (e) {
-      html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem">No se pudo renderizar el PDF</div></div>';
+      html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center">' + (curExt.toUpperCase()) + ' sin vista previa disponible<br><span style="font-size:11px">Para ver el archivo, ábrelo en Adobe Illustrator o expórtalo como PDF</span></div></div>';
     }
+  } else if (curExt === 'ai' || curExt === 'eps') {
+    html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin-bottom:10px;opacity:0.4"><rect x="6" y="4" width="28" height="32" rx="3" stroke="currentColor" stroke-width="2"/><path d="M14 16h12M14 22h12M14 28h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div>' + (curExt.toUpperCase()) + ' sin vista previa embebida</div><div style="font-size:11px;margin-top:6px">Este archivo no incluye preview PDF. Para verlo, ábrelo en Illustrator o expórtalo como PDF.</div></div></div>';
   } else {
     if (!curURL) curURL = URL.createObjectURL(curFile);
     html.dataset.prev = '<div class="preview"><img src="' + curURL + '" alt=""></div>';
