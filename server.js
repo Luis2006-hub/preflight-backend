@@ -355,23 +355,26 @@ function showResults(d){
 
   let calLabel,calStatus,calDetail;
   if(curExt==='pdf'&&!dpi){calLabel='Vectorial';calStatus='s-ok';calDetail='Calidad perfecta a cualquier tamaño';}
-  else if(calidadDPI>=300){calLabel='Alta';calStatus='s-ok';calDetail='Calidad profesional ('+calidadDPI+' DPI'+targetInfo+')';}
-  else if(calidadDPI>=200){calLabel='Buena';calStatus='s-ok';calDetail='Buena calidad ('+calidadDPI+' DPI'+targetInfo+')';}
-  else if(calidadDPI>=150){calLabel='Media';calStatus='s-wn';calDetail='Aceptable pero podrá verse algo borroso ('+calidadDPI+' DPI'+targetInfo+')';}
-  else if(calidadDPI>=100){calLabel='Baja';calStatus='s-er';calDetail='Se verá pixelado ('+calidadDPI+' DPI'+targetInfo+')';}
-  else{calLabel='Muy baja';calStatus='s-er';calDetail='Demasiado pequeño para ese tamaño ('+calidadDPI+' DPI'+targetInfo+')';}
+  else if(calidadDPI>=300){calLabel='Excelente';calStatus='s-ok';calDetail='Calidad profesional ('+calidadDPI+' DPI'+targetInfo+')';}
+  else if(calidadDPI>=200){calLabel='Alta';calStatus='s-ok';calDetail='Perfecta para imprenta digital ('+calidadDPI+' DPI'+targetInfo+')';}
+  else if(calidadDPI>=150){calLabel='Buena';calStatus='s-ok';calDetail='Apta para imprenta digital ('+calidadDPI+' DPI'+targetInfo+')';}
+  else if(calidadDPI>=100){calLabel='Aceptable';calStatus='s-wn';calDetail='Funciona para flyers y volantes pequeños ('+calidadDPI+' DPI'+targetInfo+')';}
+  else if(calidadDPI>=72){calLabel='Limitada';calStatus='s-wn';calDetail='Solo para uso pequeño o digital ('+calidadDPI+' DPI'+targetInfo+')';}
+  else{calLabel='Muy baja';calStatus='s-er';calDetail='No recomendado para imprenta ('+calidadDPI+' DPI'+targetInfo+')';}
 
   // Tamaño máximo recomendado a 300 DPI
   let tamRecomendado='';
   if(curPxW&&curPxH){
-    const maxW=parseFloat(((curPxW/300)*2.54).toFixed(1));
-    const maxH=parseFloat(((curPxH/300)*2.54).toFixed(1));
-    tamRecomendado='Calidad alta hasta '+maxW+' × '+maxH+' cm';
+    const maxW200=parseFloat(((curPxW/200)*2.54).toFixed(1));
+    const maxH200=parseFloat(((curPxH/200)*2.54).toFixed(1));
+    const maxW150=parseFloat(((curPxW/150)*2.54).toFixed(1));
+    const maxH150=parseFloat(((curPxH/150)*2.54).toFixed(1));
+    tamRecomendado='Imprenta digital con calidad alta hasta '+maxW200+' × '+maxH200+' cm. Aceptable hasta '+maxW150+' × '+maxH150+' cm.';
   }
 
   // Veredicto general
   const probs=[];
-  if(calidadDPI&&calidadDPI<150)probs.push('calidad');
+  if(calidadDPI&&calidadDPI<100)probs.push('calidad');
   if(!colorOK)probs.push('color');
   if(!sangria)probs.push('corte');
 
