@@ -121,6 +121,12 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .p-wn{background:#fff4e0;color:#8a5500;}
 .p-er{background:#fce8e8;color:#a32d2d;}
 .c-val{font-size:20px;font-weight:600;color:#1a1d2e;line-height:1.25;margin-bottom:5px;}
+.size-block{margin:6px 0 10px;}
+.size-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed #e3e6f0;}
+.size-row:last-child{border-bottom:none;}
+.size-key{font-size:12px;color:#6b7088;font-weight:500;}
+.size-val{font-size:15px;font-weight:600;color:#1a1d2e;}
+.size-val-target{color:#1a3eb8;}
 .c-sub{font-size:12px;color:#6b7088;line-height:1.5;}
 
 .ai{background:#eef1fc;border:1px solid #d8def0;border-radius:14px;padding:14px 16px;margin-bottom:12px;}
@@ -639,7 +645,31 @@ function showResults(d) {
   html += r.dataset.prev || '';
 
   html += '<div class="cards">';
-  html += '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div><div class="c-val">' + tamLabel + '</div><div class="c-sub">' + tamRef + '</div></div>';
+  // Construir info de tamaño según si hay tamaño objetivo
+  let tamCardHTML = '';
+  if (targetSize && cmW && cmH) {
+    // Comparar tamaño archivo vs tamaño solicitado
+    const factorEscala = (targetSize.w / cmW * 100).toFixed(0);
+    const esIgual = Math.abs(targetSize.w - cmW) < 0.5 && Math.abs(targetSize.h - cmH) < 0.5;
+    const esMayor = targetSize.w > cmW;
+
+    let comparacion = '';
+    if (esIgual) {
+      comparacion = 'Mismo tamaño que el archivo';
+    } else if (esMayor) {
+      comparacion = 'Se ampliará al ' + factorEscala + '% del tamaño original';
+    } else {
+      comparacion = 'Se reducirá al ' + factorEscala + '% del tamaño original';
+    }
+
+    tamCardHTML = '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div>'
+      + '<div class="size-block"><div class="size-row"><span class="size-key">Archivo:</span><span class="size-val">' + cmW + ' × ' + cmH + ' cm</span></div>'
+      + '<div class="size-row size-row-target"><span class="size-key">A imprimir:</span><span class="size-val size-val-target">' + targetSize.w + ' × ' + targetSize.h + ' cm</span></div></div>'
+      + '<div class="c-sub">' + comparacion + '</div></div>';
+  } else {
+    tamCardHTML = '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div><div class="c-val">' + tamLabel + '</div><div class="c-sub">' + tamRef + '</div></div>';
+  }
+  html += tamCardHTML;
   html += '<div class="card"><div class="c-head"><span class="c-label">Calidad</span><span class="c-pill ' + calStatus + '">' + (calStatus === 'p-ok' ? 'Apto' : calStatus === 'p-wn' ? 'Revisar' : 'Bajo') + '</span></div><div class="c-val">' + calLabel + '</div><div class="c-sub">' + calDetail + '</div></div>';
     // Detectar cruces de corte y medida interna
   const tieneCruces = (d.cruces_de_corte && d.cruces_de_corte.tiene) || false;
