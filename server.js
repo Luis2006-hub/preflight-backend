@@ -3,7 +3,7 @@ const multer = require("multer");
 const cors = require("cors");
 
 const app = express();
-const upload = multer({ limits: { fileSize: 20 * 1024 * 1024 } });
+const upload = multer({ limits: { fileSize: 50 * 1024 * 1024 } });
 app.use(cors());
 app.use(express.json());
 
@@ -43,6 +43,7 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .drop-t{font-size:17px;font-weight:600;color:#1a1d2e;margin-bottom:6px;}
 .drop-h{font-size:13px;color:#6b7088;}
 .drop-f{font-size:11px;color:#9ba0b5;margin-top:10px;text-transform:uppercase;letter-spacing:0.05em;}
+.drop-limit{font-size:11px;color:#1a3eb8;margin-top:6px;font-weight:500;}
 #fi{display:none;}
 
 .szq{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:1.5rem;}
@@ -147,6 +148,7 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
       <div class="drop-t">Sube tu archivo de imprenta</div>
       <div class="drop-h">Arrastra aquí o haz clic para seleccionar</div>
       <div class="drop-f">PDF - PNG - JPG - TIFF - GIF - BMP - WEBP</div>
+      <div class="drop-limit">Máximo 50 MB por archivo</div>
     </div>
     <input type="file" id="fi" accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif,.gif,.bmp,.webp">
   </div>
@@ -251,6 +253,15 @@ function step(p, m) {
 
 async function loadFile(file) {
   if (!file) return;
+
+  // Validar tamaño antes de procesar
+  const MAX_SIZE = 50 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+    showSizeError(file, sizeMB);
+    return;
+  }
+
   curFile = file;
   curExt = file.name.split('.').pop().toLowerCase();
   if (curURL) { URL.revokeObjectURL(curURL); curURL = null; }
@@ -284,8 +295,20 @@ async function loadFile(file) {
       } catch (e) { console.warn('getPDFDims:', e); }
       try {
         const buf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
         curPages = pdf.numPages;
+        // Renderizar miniatura de primera página
+        const page = await pdf.getPage(1);
+        const vp = page.getViewport({ scale: 0.3 });
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width;
+        canvas.height = vp.height;
+        canvas.style.maxWidth = '100%';
+        canvas.style.maxHeight = '100%';
+        canvas.style.objectFit = 'contain';
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+        thumbEl.innerHTML = '';
+        thumbEl.appendChild(canvas);
       } catch (e) { console.warn('pdf pages:', e); }
     }
   }
@@ -525,6 +548,14 @@ function showResults(d) {
   if (curExt === 'pdf') renderPDFPages();
 }
 
+function showSizeError(file, sizeMB) {
+  document.getElementById('dropbox').style.display = 'none';
+  const r = document.getElementById('results');
+  r.innerHTML = '<div class="err"><div class="err-t">Archivo demasiado grande</div><div class="err-d">El archivo <strong>' + file.name + '</strong> pesa <strong>' + sizeMB + ' MB</strong>. El tamaño máximo permitido es <strong>50 MB</strong>.<br><br>Soluciones:<br>- Comprime el PDF en herramientas como ilovepdf.com o smallpdf.com<br>- Reduce la resolución de imágenes muy grandes<br>- Divide el documento en partes más pequeñas</div></div><div class="acts"><button class="bt bt-pr" id="btn-retry">Subir otro archivo</button></div>';
+  r.style.display = 'block';
+  document.getElementById('btn-retry').addEventListener('click', resetAll);
+}
+
 function showError(msg) {
   document.getElementById('anz').style.display = 'none';
   const r = document.getElementById('results');
@@ -627,7 +658,21 @@ if (document.readyState === 'loading') {
   res.send(html);
 });
 
-app.post("/analizar", upload.single("archivo"), async (req, res) => {
+app.post("/analizar", (req, res, next) => {
+  upload.single("archivo")(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({ ok: false, error: "Archivo demasiado grande. Maximo 50 MB." });
+      }
+      return res.status(400).json({ ok: false, error: "Error al recibir archivo: " + err.message });
+    } else if (err) {
+      return res.status(500).json({ ok: false, error: "Error del servidor: " + err.message });
+    }
+    handleAnalysis(req, res);
+  });
+});
+
+async function handleAnalysis(req, res) {
   try {
     if (!req.file) return res.status(400).json({ error: "No se recibió archivo" });
     const { originalname, mimetype, buffer, size } = req.file;
@@ -710,7 +755,7 @@ app.post("/analizar", upload.single("archivo"), async (req, res) => {
     console.error("Error:", error.message);
     res.status(500).json({ ok: false, error: error.message });
   }
-});
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Preflight Pro v6 (Tekkrom) puerto " + PORT));
