@@ -827,7 +827,7 @@ function showResults(d) {
     document.getElementById('adv-content').classList.toggle('show');
   });
 
-  if (curExt === 'pdf') renderPDFPages();
+  if (curExt === 'pdf' || curExt === 'ai' || curExt === 'eps') renderPDFPages();
 }
 
 function showSizeError(file, sizeMB) {
