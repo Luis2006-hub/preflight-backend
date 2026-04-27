@@ -383,10 +383,32 @@ async function loadFile(file) {
     } catch (e) { console.warn('getPSDDims:', e); }
   } else if (curExt === 'ai' || curExt === 'eps') {
     thumbEl.innerHTML = '<div class="sqt-ext">' + curExt.toUpperCase() + '</div>';
-    // Los archivos AI modernos tienen un PDF embebido. Intentamos cargarlos como PDF.
+    window._aiHasPDFPreview = false;
+    window._aiPdfBuffer = null;
     try {
       const buf = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+      // Buscar la firma "%PDF-" en el archivo. Los AI modernos tienen un PDF embebido
+      // que puede empezar al inicio o después de algún offset.
+      const bytes = new Uint8Array(buf);
+      let pdfStart = -1;
+      for (let i = 0; i < Math.min(bytes.length - 5, 50000); i++) {
+        if (bytes[i] === 0x25 && bytes[i+1] === 0x50 && bytes[i+2] === 0x44 && bytes[i+3] === 0x46 && bytes[i+4] === 0x2D) {
+          pdfStart = i;
+          break;
+        }
+      }
+
+      let pdfBuffer;
+      if (pdfStart > 0) {
+        // Recortar desde el inicio del PDF
+        pdfBuffer = buf.slice(pdfStart);
+      } else if (pdfStart === 0) {
+        pdfBuffer = buf;
+      } else {
+        throw new Error('No se encontró PDF embebido en el archivo AI/EPS');
+      }
+
+      const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
       curPages = pdf.numPages;
       const page = await pdf.getPage(1);
       const vp1 = page.getViewport({ scale: 1 });
@@ -394,8 +416,9 @@ async function loadFile(file) {
       curMmH = Math.round(vp1.height * (25.4 / 72));
       curCmW = parseFloat((curMmW / 10).toFixed(1));
       curCmH = parseFloat((curMmH / 10).toFixed(1));
+
       // Renderizar miniatura
-      const vp = page.getViewport({ scale: 0.3 });
+      const vp = page.getViewport({ scale: 0.5 });
       const canvas = document.createElement('canvas');
       canvas.width = vp.width;
       canvas.height = vp.height;
@@ -405,10 +428,12 @@ async function loadFile(file) {
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       thumbEl.innerHTML = '';
       thumbEl.appendChild(canvas);
-      // Marcar que tiene preview PDF para poder mostrarlo en el visor principal
+
+      // Guardar buffer recortado para reusar en el visor principal
       window._aiHasPDFPreview = true;
+      window._aiPdfBuffer = pdfBuffer;
     } catch (e) {
-      console.warn('AI/EPS sin PDF embebido:', e);
+      console.warn('AI/EPS preview falló:', e);
       window._aiHasPDFPreview = false;
     }
   } else {
@@ -567,13 +592,20 @@ async function renderPrev() {
   const html = document.getElementById('results');
   if (curExt === 'pdf' || ((curExt === 'ai' || curExt === 'eps') && window._aiHasPDFPreview)) {
     try {
-      const buf = await curFile.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let bufToUse;
+      if ((curExt === 'ai' || curExt === 'eps') && window._aiPdfBuffer) {
+        // Reusar buffer recortado del AI/EPS
+        bufToUse = window._aiPdfBuffer.slice(0);
+      } else {
+        bufToUse = await curFile.arrayBuffer();
+      }
+      const pdf = await pdfjsLib.getDocument({ data: bufToUse }).promise;
       const total = Math.min(pdf.numPages, 10);
       html.dataset.prev = '<div class="preview"><div class="preview-pdf" id="pdf-prev"></div></div>';
       window._pdfDoc = pdf;
       window._pdfPages = total;
     } catch (e) {
+      console.warn('renderPrev PDF falló:', e);
       html.dataset.prev = '<div class="preview"><div style="color:#9ba0b5;padding:2rem;text-align:center">' + (curExt.toUpperCase()) + ' sin vista previa disponible<br><span style="font-size:11px">Para ver el archivo, ábrelo en Adobe Illustrator o expórtalo como PDF</span></div></div>';
     }
   } else if (curExt === 'ai' || curExt === 'eps') {
