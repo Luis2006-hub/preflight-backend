@@ -70,11 +70,14 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .pn{font-size:13px;font-weight:600;color:#1a1d2e;}
 .ps{font-size:11px;color:#6b7088;margin-top:3px;}
 
-.cust{display:flex;gap:10px;align-items:center;padding:14px;background:#f5f6f9;border-radius:10px;margin-bottom:16px;flex-wrap:wrap;}
-.cust-l{font-size:13px;color:#6b7088;font-weight:500;}
-.cust-i{width:90px;padding:9px 11px;border:1px solid #c5cad9;border-radius:7px;font-size:13px;font-family:inherit;background:white;}
-.cust-i:focus{outline:none;border-color:#1a3eb8;}
-.cust-hint{font-size:11px;color:#6b7088;width:100%;margin-top:6px;font-style:italic;}
+.cust-big{padding:20px;background:#f5f6f9;border-radius:12px;margin-bottom:16px;}
+.cust-row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+.cust-input-big{width:130px;padding:14px 16px;border:1.5px solid #c5cad9;border-radius:10px;font-size:18px;font-weight:600;font-family:inherit;background:white;text-align:center;color:#1a1d2e;transition:all 0.15s;}
+.cust-input-big::placeholder{font-weight:400;color:#9ba0b5;}
+.cust-input-big:focus{outline:none;border-color:#1a3eb8;box-shadow:0 0 0 4px rgba(26,62,184,0.1);}
+.cust-x{font-size:20px;color:#6b7088;font-weight:500;}
+.cust-unit{font-size:16px;color:#6b7088;font-weight:500;}
+.cust-hint{font-size:12px;color:#6b7088;text-align:center;display:block;margin-top:4px;font-style:italic;line-height:1.5;}
 
 .acts{display:flex;gap:10px;flex-wrap:wrap;}
 .bt{padding:11px 20px;border-radius:8px;border:1px solid #c5cad9;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#1a1d2e;font-family:inherit;}
@@ -83,13 +86,14 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .bt-pr:hover{filter:brightness(1.1);}
 .bt-sk{color:#6b7088;background:transparent;border:none;}
 
-.anz{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:3rem 1.5rem;text-align:center;}
-.spin{width:36px;height:36px;border:3px solid #e3e6f0;border-top-color:#1a3eb8;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 14px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.anz-t{font-size:14px;font-weight:600;color:#1a1d2e;margin-bottom:5px;}
-.anz-s{font-size:12px;color:#6b7088;margin-bottom:14px;}
-.prog{height:4px;background:#e3e6f0;border-radius:3px;overflow:hidden;width:280px;margin:0 auto;}
-.pf{height:100%;background:linear-gradient(90deg,#1a3eb8,#4a1c8c);transition:width 0.4s;border-radius:3px;}
+.anz{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:3.5rem 1.5rem;text-align:center;}
+.big-spinner{position:relative;width:120px;height:120px;margin:0 auto 1.5rem;}
+.big-spin-svg{transform:rotate(0deg);animation:big-spin-rotate 2s linear infinite;}
+.big-spin-arc{transition:stroke-dashoffset 0.5s ease;}
+@keyframes big-spin-rotate{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+.big-spin-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;font-weight:600;color:#1a1d2e;font-variant-numeric:tabular-nums;}
+.anz-t{font-size:15px;font-weight:600;color:#1a1d2e;margin-bottom:5px;}
+.anz-s{font-size:12px;color:#6b7088;}
 
 .fhead{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:1rem 1.25rem;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
 .ft{width:54px;height:54px;border-radius:10px;background:#f5f6f9;border:1px solid #e3e6f0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -167,16 +171,16 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
         <div class="sqm" id="szm"></div>
       </div>
     </div>
-    <div class="sqtitle">¿En qué tamaño lo vas a imprimir?</div>
+    <div class="sqtitle">Ingresa tamaño aproximado de impresión</div>
     <div class="sqsub">Esto nos permite calcular si la calidad será suficiente al imprimirlo. Puedes omitir si no estás seguro.</div>
-    <div class="presets" id="presets-box"></div>
-    <div class="cust">
-      <span class="cust-l">Personalizado:</span>
-      <input type="number" class="cust-i" id="cw" placeholder="ancho" step="0.1">
-      <span style="color:#6b7088">x</span>
-      <input type="number" class="cust-i" id="ch" placeholder="alto" step="0.1">
-      <span style="color:#6b7088">cm</span>
-      <span class="cust-hint">Ingresa solo una medida, la otra se calcula proporcionalmente</span>
+    <div class="cust-big">
+      <div class="cust-row">
+        <input type="number" class="cust-input-big" id="cw" placeholder="Ancho" step="0.1">
+        <span class="cust-x">×</span>
+        <input type="number" class="cust-input-big" id="ch" placeholder="Alto" step="0.1">
+        <span class="cust-unit">cm</span>
+      </div>
+      <span class="cust-hint">Ingresa solo una medida, la otra se calcula automáticamente respetando las proporciones del archivo</span>
     </div>
     <div class="acts">
       <button class="bt bt-pr" id="btn-analyze">Analizar archivo</button>
@@ -185,10 +189,21 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
   </div>
 
   <div class="anz" id="anz" style="display:none">
-    <div class="spin"></div>
+    <div class="big-spinner">
+      <svg class="big-spin-svg" width="120" height="120" viewBox="0 0 120 120">
+        <circle class="big-spin-track" cx="60" cy="60" r="52" fill="none" stroke="#e3e6f0" stroke-width="6"/>
+        <circle class="big-spin-arc" cx="60" cy="60" r="52" fill="none" stroke="url(#progress-grad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="310" transform="rotate(-90 60 60)"/>
+        <defs>
+          <linearGradient id="progress-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1a3eb8"/>
+            <stop offset="100%" stop-color="#4a1c8c"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="big-spin-pct" id="prog-pct">5%</div>
+    </div>
     <div class="anz-t">Analizando archivo</div>
     <div class="anz-s" id="anzs">Iniciando</div>
-    <div class="prog"><div class="pf" id="prog" style="width:5%"></div></div>
   </div>
 
   <div id="results" style="display:none"></div>
@@ -203,17 +218,7 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const BACKEND = 'https://preflight-backend-production-e718.up.railway.app';
 
-const PRESETS = [
-  { name: 'Tarjeta de visita', size: '5.5 x 8.5 cm', w: 5.5, h: 8.5 },
-  { name: 'Postal / Volante', size: '10 x 15 cm', w: 10, h: 15 },
-  { name: 'Flyer A5', size: '14.8 x 21 cm', w: 14.8, h: 21 },
-  { name: 'Hoja Carta', size: '21.6 x 27.9 cm', w: 21.6, h: 27.9 },
-  { name: 'Hoja A4', size: '21 x 29.7 cm', w: 21, h: 29.7 },
-  { name: 'Hoja Oficio', size: '21.6 x 33 cm', w: 21.6, h: 33 },
-  { name: 'Doble Carta', size: '27.9 x 43.2 cm', w: 27.9, h: 43.2 },
-  { name: 'Afiche A3', size: '29.7 x 42 cm', w: 29.7, h: 42 },
-  { name: 'Poster A2', size: '42 x 59.4 cm', w: 42, h: 59.4 }
-];
+const PRESETS = [];
 
 let curFile = null, curURL = null, curPxW = null, curPxH = null, curDPI = null;
 let curMmW = null, curMmH = null, curCmW = null, curCmH = null, curExt = '', curPages = 1;
@@ -290,8 +295,15 @@ function fb(b) {
 }
 
 function step(p, m) {
-  document.getElementById('prog').style.width = p + '%';
+  // Actualizar texto de paso
   document.getElementById('anzs').textContent = m;
+  // Actualizar porcentaje grande
+  document.getElementById('prog-pct').textContent = Math.round(p) + '%';
+  // Actualizar arco SVG (radio 52, perímetro = 2 * PI * 52 ≈ 326.7)
+  const total = 326.7;
+  const offset = total - (total * p / 100);
+  const arc = document.querySelector('.big-spin-arc');
+  if (arc) arc.setAttribute('stroke-dashoffset', offset);
 }
 
 async function loadFile(file) {
