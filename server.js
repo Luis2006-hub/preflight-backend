@@ -47,6 +47,11 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 #fi{display:none;}
 
 .szq{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:1.5rem;}
+.format-warn{display:flex;gap:12px;align-items:flex-start;background:#fff8eb;border:1px solid #fae2b8;border-radius:10px;padding:12px 14px;margin-bottom:1rem;}
+.fw-ico{width:24px;height:24px;border-radius:50%;background:#8a5500;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0;}
+.fw-body{flex:1;}
+.fw-t{font-size:13px;font-weight:600;color:#5a3a0a;margin-bottom:4px;}
+.fw-d{font-size:12px;color:#5a3a0a;line-height:1.5;}
 .sqh{display:flex;align-items:center;gap:14px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #f0f1f7;}
 .sqt{width:54px;height:54px;border-radius:10px;background:#f5f6f9;border:1px solid #e3e6f0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .sqt img{max-width:100%;max-height:100%;object-fit:contain;}
@@ -147,10 +152,10 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
       <div class="drop-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 4v14M9 10l4-6 4 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
       <div class="drop-t">Sube tu archivo de imprenta</div>
       <div class="drop-h">Arrastra aquí o haz clic para seleccionar</div>
-      <div class="drop-f">PDF - PNG - JPG - TIFF - GIF - BMP - WEBP</div>
+      <div class="drop-f">PDF - PNG - JPG - TIFF - PSD - AI - EPS - SVG - GIF - BMP - WEBP</div>
       <div class="drop-limit">Máximo 50 MB por archivo</div>
     </div>
-    <input type="file" id="fi" accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif,.gif,.bmp,.webp">
+    <input type="file" id="fi" accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif,.gif,.bmp,.webp,.svg,.psd,.ai,.eps">
   </div>
 
   <div class="szq" id="szq" style="display:none">
@@ -283,6 +288,20 @@ async function loadFile(file) {
     try {
       curDPI = await getDPI(file);
     } catch (e) { console.warn('getDPI:', e); }
+  } else if (curExt === 'psd') {
+    thumbEl.innerHTML = '<div class="sqt-ext">PSD</div>';
+    try {
+      const psd = await getPSDDims(file);
+      if (psd) {
+        curPxW = psd.w;
+        curPxH = psd.h;
+        curDPI = psd.dpi;
+        curMmW = Math.round((curPxW / curDPI) * 25.4);
+        curMmH = Math.round((curPxH / curDPI) * 25.4);
+        curCmW = parseFloat((curMmW / 10).toFixed(1));
+        curCmH = parseFloat((curMmH / 10).toFixed(1));
+      }
+    } catch (e) { console.warn('getPSDDims:', e); }
   } else {
     thumbEl.innerHTML = '<div class="sqt-ext">' + curExt.toUpperCase() + '</div>';
     if (curExt === 'pdf') {
@@ -331,6 +350,20 @@ async function loadFile(file) {
     metaHTML += '<span class="fm-pg">' + curPages + ' páginas</span>';
   }
   document.getElementById('szm').innerHTML = metaHTML;
+
+  // Disclaimer para formatos sin lectura completa
+  const formatosLimitados = ['ai', 'eps', 'svg'];
+  const disclaimerEl = document.getElementById('format-warning');
+  if (formatosLimitados.includes(curExt)) {
+    if (disclaimerEl) disclaimerEl.remove();
+    const warn = document.createElement('div');
+    warn.id = 'format-warning';
+    warn.className = 'format-warn';
+    warn.innerHTML = '<div class="fw-ico">!</div><div class="fw-body"><div class="fw-t">Formato con análisis limitado</div><div class="fw-d">Los archivos <strong>' + curExt.toUpperCase() + '</strong> son formatos cerrados de Adobe. El análisis será parcial — las medidas pueden no ser exactas y algunas verificaciones no se podrán realizar. Para mejor precisión, exporta tu archivo como <strong>PDF</strong> antes de subirlo.</div></div>';
+    document.querySelector('.szq .sqh').after(warn);
+  } else if (disclaimerEl) {
+    disclaimerEl.remove();
+  }
 
   document.getElementById('dropbox').style.display = 'none';
   document.getElementById('szq').style.display = 'block';
@@ -518,6 +551,12 @@ function showResults(d) {
   html += '<div class="card"><div class="c-head"><span class="c-label">Color</span><span class="c-pill ' + (colorOK ? 'p-ok' : 'p-wn') + '">' + (colorOK ? 'Apto' : 'Revisar') + '</span></div><div class="c-val">' + modoColor + '</div><div class="c-sub">' + (colorOK ? 'Configurado para imprenta' : 'Convertir a CMYK para colores fieles') + '</div></div>';
   html += '</div>';
 
+  // Disclaimer en resultados para formatos limitados
+  const fLim = ['ai', 'eps', 'svg'];
+  if (fLim.includes(curExt)) {
+    html += '<div class="format-warn" style="margin-bottom:12px"><div class="fw-ico">!</div><div class="fw-body"><div class="fw-t">Análisis limitado por formato</div><div class="fw-d">Los archivos <strong>' + curExt.toUpperCase() + '</strong> son formatos cerrados de Adobe. Algunos datos pueden ser estimaciones. Para análisis preciso exporta como <strong>PDF</strong>.</div></div></div>';
+  }
+
   if (d.resumen) {
     html += '<div class="ai"><div class="ai-l"><span class="ai-l-dot"></span>Análisis IA</div><div class="ai-t">' + d.resumen + '</div></div>';
   }
@@ -525,7 +564,7 @@ function showResults(d) {
     html += '<div class="ai" style="background:#fff8eb;border-color:#fae2b8"><div class="ai-l" style="color:#8a5500"><span class="ai-l-dot" style="background:#8a5500"></span>Recomendación</div><div class="ai-t" style="color:#5a3a0a">' + tamRecomendado + '</div></div>';
   }
 
-  html += '<div class="acts"><button class="bt bt-pr" id="btn-fix">Cómo arreglarlo</button><button class="bt" id="btn-reset">Subir otro archivo</button></div>';
+  html += '<div class="acts"><button class="bt bt-pr" id="btn-reset">Subir otro archivo</button></div>';
   html += '<div class="adv-tg" id="adv-toggle">Ver detalles técnicos</div>';
   html += '<div class="adv-c" id="adv-content">Archivo: ' + curFile.name + '<br>Formato: ' + curExt.toUpperCase() + '<br>Páginas: ' + curPages + '<br>' + (curPxW ? 'Píxeles: ' + curPxW + ' x ' + curPxH + '<br>' : '') + (dpi ? 'Resolución: ' + dpi + ' DPI<br>' : '') + 'Medidas: ' + tamLabel + '<br>Modo color: ' + modoColor + '<br>Sangría: ' + (sangria ? 'Sí' : 'No') + '<br>Tiempo estimado: ' + ((d.tiempo_estimado && d.tiempo_estimado.total_minutos) || '—') + ' min</div>';
 
@@ -533,13 +572,6 @@ function showResults(d) {
   r.style.display = 'block';
 
   // Conectar handlers después del innerHTML
-  document.getElementById('btn-fix').addEventListener('click', () => {
-    if (typeof sendPrompt !== 'undefined') {
-      sendPrompt('¿Cómo arreglo los problemas detectados en mi archivo de imprenta? Explícame paso a paso en lenguaje simple.');
-    } else {
-      alert('Esta función requiere abrir el archivo en Claude.');
-    }
-  });
   document.getElementById('btn-reset').addEventListener('click', resetAll);
   document.getElementById('adv-toggle').addEventListener('click', () => {
     document.getElementById('adv-content').classList.toggle('show');
@@ -644,6 +676,44 @@ function getPDFDims(file) {
       } catch (e) { resolve(null); }
     };
     reader.readAsText(file.slice(0, 65536));
+  });
+}
+
+function getPSDDims(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const b = new Uint8Array(e.target.result);
+        if (b[0] === 0x38 && b[1] === 0x42 && b[2] === 0x50 && b[3] === 0x53) {
+          const h = (b[14] << 24) | (b[15] << 16) | (b[16] << 8) | b[17];
+          const w = (b[18] << 24) | (b[19] << 16) | (b[20] << 8) | b[21];
+          let dpi = 72;
+          let o = 26;
+          const cml = (b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3];
+          o += 4 + cml;
+          const irl = (b[o] << 24) | (b[o + 1] << 16) | (b[o + 2] << 8) | b[o + 3];
+          o += 4;
+          const end = o + irl;
+          while (o < end - 8) {
+            if (b[o] === 0x38 && b[o + 1] === 0x42 && b[o + 2] === 0x49 && b[o + 3] === 0x4D) {
+              const rid = (b[o + 4] << 8) | b[o + 5];
+              const nl = b[o + 6];
+              const np = nl % 2 === 0 ? nl + 2 : nl + 1;
+              const dof = o + 6 + np;
+              const dl = (b[dof] << 24) | (b[dof + 1] << 16) | (b[dof + 2] << 8) | b[dof + 3];
+              if (rid === 0x03ED && dl >= 4) {
+                const df = (b[dof + 4] << 8) | b[dof + 5];
+                if (df > 0) dpi = df;
+              }
+              o = dof + 4 + dl + (dl % 2);
+            } else break;
+          }
+          resolve({ w, h, dpi });
+        } else resolve(null);
+      } catch (e) { resolve(null); }
+    };
+    reader.readAsArrayBuffer(file.slice(0, 262144));
   });
 }
 
