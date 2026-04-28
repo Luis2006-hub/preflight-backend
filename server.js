@@ -709,8 +709,19 @@ function showResults(d) {
     targetInfo = ' al imprimir en ' + targetSize.w + 'x' + targetSize.h + ' cm';
   }
 
+  // Evaluación visual de la IA tiene prioridad sobre el cálculo matemático de DPI
+  const calidadVisualIA = (d.calidad_visual || d.calidad_general || '').toLowerCase();
+
   let calLabel, calStatus, calDetail;
-  if (curExt === 'pdf' && !dpi) {
+
+  // Si la IA detectó pixelación visual REAL, marcar como problema sin importar el DPI
+  if (calidadVisualIA === 'baja') {
+    calLabel = 'Baja'; calStatus = 'p-er';
+    calDetail = 'Imagen visualmente pixelada o borrosa' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
+  } else if (calidadVisualIA === 'media') {
+    calLabel = 'Media'; calStatus = 'p-wn';
+    calDetail = 'Algo de pixelación visible' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
+  } else if (curExt === 'pdf' && !dpi) {
     calLabel = 'Vectorial'; calStatus = 'p-ok';
     calDetail = 'Calidad perfecta a cualquier tamaño';
   } else if (calidadDPI >= 300) {
@@ -1037,7 +1048,7 @@ async function handleAnalysis(req, res) {
     let ctx = "";
     if (cmAncho && cmAlto) ctx = "Medidas: " + cmAncho + "x" + cmAlto + " cm" + (dpiMeta ? ", DPI: " + dpiMeta : "") + ".";
 
-    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. IMPORTANTE para PDFs: los archivos profesionales mezclan texto vectorial nitido con imagenes de fondo rasterizadas (a veces con efectos artisticos pixelados intencionales). Si los textos y elementos importantes (logos, QR, numeros) estan nitidos, marca calidad como ALTA aunque el fondo decorativo se vea pixelado. Solo marca problema si todo el contenido principal es de baja resolucion. CRUCES DE CORTE: si el archivo tiene cruces de corte (lineas o marcas en las esquinas que indican donde cortar), calcula la MEDIDA INTERNA DEL CORTE en cm — la distancia entre las lineas de corte horizontales y verticales (es decir, el tamano final del producto despues de cortar, sin incluir sangria ni cruces). Reportalo en cruces_de_corte.medida_interna_cm como string ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"medida_interna_cm":null,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
+    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. CALIDAD VISUAL — REGLA CRITICA: examina el archivo VISUALMENTE para detectar pixelacion, blur, artefactos JPEG, bordes dentados, perdida de detalle. Si TODA la imagen se ve pixelada, borrosa o con compresion JPEG visible (incluso textos que deberian ser nitidos se ven suaves o aliasados), reporta calidad_visual como BAJA aunque los calculos de DPI digan lo contrario. Solo marca calidad_visual ALTA cuando el archivo se ve realmente nitido. Para PDFs profesionales que mezclan texto vectorial nitido con imagenes de fondo rasterizadas con efectos artisticos pixelados intencionales: si textos/QR/logos importantes estan nitidos, marca ALTA aunque el fondo decorativo se vea pixelado. Pero si TODO incluyendo textos esta pixelado, marca BAJA. CRUCES DE CORTE: si el archivo tiene cruces de corte, calcula la MEDIDA INTERNA DEL CORTE en cm. Reportalo en cruces_de_corte.medida_interna_cm como string ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"medida_interna_cm":null,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_visual":"alta|media|baja","calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
 
     let userContent;
     if (esVisual || esPDF) {
