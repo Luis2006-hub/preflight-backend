@@ -128,6 +128,10 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .size-val{font-size:15px;font-weight:600;color:#1a1d2e;}
 .size-val-target{color:#1a3eb8;}
 .c-sub{font-size:12px;color:#6b7088;line-height:1.5;}
+.cal-reco{margin-top:12px;background:#eaf3de;border-left:3px solid #639922;border-radius:8px;padding:10px 12px;}
+.cal-reco-l{font-size:10px;font-weight:600;color:#3b6d11;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;}
+.cal-reco-t{font-size:12px;color:#173404;line-height:1.5;}
+.cal-reco-t strong{color:#27500a;font-weight:600;}
 
 .ai{background:#eef1fc;border:1px solid #d8def0;border-radius:14px;padding:14px 16px;margin-bottom:12px;}
 .ai-l{font-size:11px;font-weight:600;color:#1a3eb8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
@@ -721,12 +725,19 @@ function showResults(d) {
 
   let calLabel, calStatus, calDetail;
 
-  // Lógica balanceada: la IA puede sobrescribir el cálculo de DPI solo con evidencia clara
-  // - calidad_visual=baja → SIEMPRE marca problema (pixelación indiscutible vista por la IA)
-  // - calidad_visual=media → solo marca problema si el DPI matemático también es bajo (<150)
-  //   Si el DPI es bueno (>=150), confiar en el cálculo matemático y mostrar el resultado del DPI
-  // - calidad_visual=alta o sin info → usar cálculo matemático normal
-  if (calidadVisualIA === 'baja') {
+  // Cascada de calidad con prioridades correctas:
+  // 1. PRIMERO: Si DPI matemático es bajo (<100), siempre se reporta tal cual sin importar lo que diga la IA
+  //    (la IA puede equivocarse hacia abajo diciendo "media" cuando en realidad es muy baja, no debe ocultar problemas reales)
+  // 2. La IA puede degradar a "Baja" solo si ve pixelación clara (override a calidad alta aparente)
+  // 3. PDF vectorial sin DPI rasterizado → Vectorial (calidad óptima)
+  // 4. DPI bueno (>=150) → respetar el cálculo matemático aunque la IA diga "media"
+  if (calidadDPI && calidadDPI < 72) {
+    calLabel = 'Muy baja'; calStatus = 'p-er';
+    calDetail = 'No recomendado para imprenta (' + calidadDPI + ' DPI' + targetInfo + ')';
+  } else if (calidadDPI && calidadDPI < 100) {
+    calLabel = 'Limitada'; calStatus = 'p-wn';
+    calDetail = 'Solo para uso pequeño (' + calidadDPI + ' DPI' + targetInfo + ')';
+  } else if (calidadVisualIA === 'baja') {
     calLabel = 'Baja'; calStatus = 'p-er';
     calDetail = 'Imagen visualmente pixelada o borrosa' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
   } else if (calidadVisualIA === 'media' && calidadDPI && calidadDPI < 150) {
@@ -747,12 +758,9 @@ function showResults(d) {
   } else if (calidadDPI >= 100) {
     calLabel = 'Aceptable'; calStatus = 'p-wn';
     calDetail = 'Funciona para flyers y volantes (' + calidadDPI + ' DPI' + targetInfo + ')';
-  } else if (calidadDPI >= 72) {
-    calLabel = 'Limitada'; calStatus = 'p-wn';
-    calDetail = 'Solo para uso pequeño (' + calidadDPI + ' DPI' + targetInfo + ')';
   } else {
-    calLabel = 'Muy baja'; calStatus = 'p-er';
-    calDetail = 'No recomendado para imprenta (' + calidadDPI + ' DPI' + targetInfo + ')';
+    calLabel = 'Sin información'; calStatus = 'p-wn';
+    calDetail = 'No se pudo determinar la resolución';
   }
 
   let tamRecomendado = '';
@@ -828,7 +836,20 @@ function showResults(d) {
     tamCardHTML = '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div><div class="c-val">' + tamLabel + '</div><div class="c-sub">' + tamRef + '</div></div>';
   }
   html += tamCardHTML;
-  html += '<div class="card"><div class="c-head"><span class="c-label">Calidad</span><span class="c-pill ' + calStatus + '">' + (calStatus === 'p-ok' ? 'Apto' : calStatus === 'p-wn' ? 'Revisar' : 'Bajo') + '</span></div><div class="c-val">' + calLabel + '</div><div class="c-sub">' + calDetail + '</div></div>';
+  // Calcular caja de recomendación de tamaño óptimo (solo cuando la calidad no es buena)
+  let calRecomendacion = '';
+  if (calStatus !== 'p-ok' && curPxW && curPxH) {
+    // Calcular a qué tamaño se alcanza 150 DPI (Buena/Apta) y 200 DPI (Alta)
+    const cm150W = parseFloat(((curPxW / 150) * 2.54).toFixed(1));
+    const cm150H = parseFloat(((curPxH / 150) * 2.54).toFixed(1));
+    const cm200W = parseFloat(((curPxW / 200) * 2.54).toFixed(1));
+    const cm200H = parseFloat(((curPxH / 200) * 2.54).toFixed(1));
+    // Solo mostrar si los tamaños sugeridos son razonables (no diminutos)
+    if (cm150W >= 3) {
+      calRecomendacion = '<div class="cal-reco"><div class="cal-reco-l">Tamaño óptimo de impresión</div><div class="cal-reco-t">Reduciendo a <strong>' + cm150W + ' × ' + cm150H + ' cm</strong> alcanza calidad alta. A <strong>' + cm200W + ' × ' + cm200H + ' cm</strong> calidad excelente.</div></div>';
+    }
+  }
+  html += '<div class="card"><div class="c-head"><span class="c-label">Calidad</span><span class="c-pill ' + calStatus + '">' + (calStatus === 'p-ok' ? 'Apto' : calStatus === 'p-wn' ? 'Revisar' : 'Bajo') + '</span></div><div class="c-val">' + calLabel + '</div><div class="c-sub">' + calDetail + '</div>' + calRecomendacion + '</div>';
     // Detectar cruces de corte y medida interna
   const tieneCruces = (d.cruces_de_corte && d.cruces_de_corte.tiene) || false;
   const medidaInterna = (d.cruces_de_corte && d.cruces_de_corte.medida_interna_cm) || null;
