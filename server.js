@@ -83,8 +83,8 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .acts{display:flex;gap:10px;flex-wrap:wrap;}
 .bt{padding:11px 20px;border-radius:8px;border:1px solid #c5cad9;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#1a1d2e;font-family:inherit;transition:all 0.15s;}
 .bt:not(.bt-pr):hover{background:#f5f6f9;border-color:#1a3eb8;color:#1a3eb8;}
-.bt-pr{background:linear-gradient(135deg,#1a3eb8,#4a1c8c);color:white;border-color:#1a3eb8;box-shadow:0 2px 6px rgba(26,62,184,0.2);}
-.bt-pr:hover{background:linear-gradient(135deg,#0f2e9e,#3a1574);color:white;border-color:#0f2e9e;box-shadow:0 4px 10px rgba(26,62,184,0.3);transform:translateY(-1px);}
+.bt-pr{background:linear-gradient(135deg,#22d3ee 0%,#3b82f6 35%,#4f46e5 65%,#7c3aed 100%);color:white;border-color:#3b82f6;box-shadow:0 2px 8px rgba(79,70,229,0.25);}
+.bt-pr:hover{background:linear-gradient(135deg,#06b6d4 0%,#2563eb 35%,#4338ca 65%,#6d28d9 100%);color:white;border-color:#2563eb;box-shadow:0 4px 12px rgba(79,70,229,0.35);transform:translateY(-1px);}
 
 .anz{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:3.5rem 1.5rem;text-align:center;}
 .big-spinner{position:relative;width:120px;height:120px;margin:0 auto 1.5rem;}
@@ -200,8 +200,10 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
         <circle class="big-spin-arc" cx="60" cy="60" r="52" fill="none" stroke="url(#progress-grad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="310" transform="rotate(-90 60 60)"/>
         <defs>
           <linearGradient id="progress-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#1a3eb8"/>
-            <stop offset="100%" stop-color="#4a1c8c"/>
+            <stop offset="0%" stop-color="#22d3ee"/>
+            <stop offset="35%" stop-color="#3b82f6"/>
+            <stop offset="65%" stop-color="#4f46e5"/>
+            <stop offset="100%" stop-color="#7c3aed"/>
           </linearGradient>
         </defs>
       </svg>
@@ -861,9 +863,6 @@ function showResults(d) {
     html += '<div class="format-warn" style="margin-bottom:12px"><div class="fw-ico">!</div><div class="fw-body"><div class="fw-t">Análisis limitado por formato</div><div class="fw-d">Los archivos <strong>' + curExt.toUpperCase() + '</strong> son formatos cerrados de Adobe. Algunos datos pueden ser estimaciones. Para análisis preciso exporta como <strong>PDF</strong>.</div></div></div>';
   }
 
-  if (d.resumen) {
-    html += '<div class="ai"><div class="ai-l"><span class="ai-l-dot"></span>Análisis IA</div><div class="ai-t">' + d.resumen + '</div></div>';
-  }
   if (tamRecomendado && !targetSize) {
     html += '<div class="ai" style="background:#fff8eb;border-color:#fae2b8"><div class="ai-l" style="color:#8a5500"><span class="ai-l-dot" style="background:#8a5500"></span>Recomendación</div><div class="ai-t" style="color:#5a3a0a">' + tamRecomendado + '</div></div>';
   }
