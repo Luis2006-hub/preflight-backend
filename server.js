@@ -54,7 +54,7 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .fw-t{font-size:13px;font-weight:600;color:#5a3a0a;margin-bottom:4px;}
 .fw-d{font-size:12px;color:#5a3a0a;line-height:1.5;}
 .sqh{display:flex;align-items:center;gap:14px;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #f0f1f7;}
-.sqt{width:54px;height:54px;border-radius:10px;background:#f5f6f9;border:1px solid #e3e6f0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sqt{width:80px;height:80px;border-radius:10px;background:#f5f6f9;border:1px solid #e3e6f0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .sqt img{max-width:100%;max-height:100%;object-fit:contain;}
 .sqt-ext{font-size:11px;font-weight:600;color:#1a3eb8;letter-spacing:0.04em;}
 .sqfn{font-size:14px;font-weight:600;color:#1a1d2e;word-break:break-all;}
@@ -96,7 +96,7 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .anz-s{font-size:12px;color:#6b7088;}
 
 .fhead{background:white;border:1px solid #e3e6f0;border-radius:14px;padding:1rem 1.25rem;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
-.ft{width:54px;height:54px;border-radius:10px;background:#f5f6f9;border:1px solid #e3e6f0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ft{width:80px;height:80px;border-radius:10px;background:#f5f6f9;border:1px solid #e3e6f0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ft img{max-width:100%;max-height:100%;object-fit:contain;}
 .ft-ext{font-size:11px;font-weight:600;color:#1a3eb8;letter-spacing:0.04em;}
 .fn{font-size:14px;font-weight:600;color:#1a1d2e;word-break:break-all;}
@@ -190,6 +190,7 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
     </div>
     <div class="acts">
       <button class="bt bt-pr" id="btn-analyze">Analizar archivo</button>
+      <button class="bt" id="btn-change-file">Seleccionar otro archivo</button>
     </div>
   </div>
 
@@ -260,6 +261,10 @@ function init() {
   });
 
   document.getElementById('btn-analyze').addEventListener('click', continueAn);
+  document.getElementById('btn-change-file').addEventListener('click', () => {
+    resetAll();
+    document.getElementById('fi').click();
+  });
 
   // Auto-calcular medida proporcional cuando el usuario ingresa una sola
   const cwInput = document.getElementById('cw');
@@ -729,7 +734,7 @@ function showResults(d) {
     calDetail = 'Algo de pixelación visible' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
   } else if (curExt === 'pdf' && !dpi) {
     calLabel = 'Vectorial'; calStatus = 'p-ok';
-    calDetail = 'Calidad perfecta a cualquier tamaño';
+    calDetail = 'Calidad óptima a cualquier tamaño';
   } else if (calidadDPI >= 300) {
     calLabel = 'Excelente'; calStatus = 'p-ok';
     calDetail = 'Calidad profesional (' + calidadDPI + ' DPI' + targetInfo + ')';
