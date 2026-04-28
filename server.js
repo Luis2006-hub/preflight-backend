@@ -821,30 +821,58 @@ function showResults(d) {
     // Detectar cruces de corte y medida interna
   const tieneCruces = (d.cruces_de_corte && d.cruces_de_corte.tiene) || false;
   const medidaInterna = (d.cruces_de_corte && d.cruces_de_corte.medida_interna_cm) || null;
+  const tipoCorte = (d.cruces_de_corte && d.cruces_de_corte.tipo) || 'ninguno';
+  const marcaDecorativa = (d.cruces_de_corte && d.cruces_de_corte.marca_decorativa_detectada) || false;
+  const usoRectanguloInvalido = tipoCorte === 'rectangulo_invalido';
 
   // Lógica mejorada de sangría/corte: 4 casos
   let sangriaPill, sangriaPillClass, sangriaTitle, sangriaSubtext;
 
   if (sangria && tieneCruces) {
-    // Caso ideal: tiene ambos
+    // Caso ideal: tiene ambos (cruces válidas + sangría)
     sangriaPill = 'Apto'; sangriaPillClass = 'p-ok';
-    sangriaTitle = 'Con sangría y corte';
+    sangriaTitle = 'Con sangría y marcas de corte';
     sangriaSubtext = medidaInterna ? 'Medida final tras corte: <strong>' + medidaInterna + '</strong>' : 'Listo para corte profesional';
   } else if (!sangria && tieneCruces) {
-    // Caso aceptable: tiene marca de corte pero falta sangría
+    // Caso aceptable: tiene cruces pero falta sangría
     sangriaPill = 'Revisar'; sangriaPillClass = 'p-wn';
-    sangriaTitle = 'Con marca de corte';
+    sangriaTitle = 'Con marcas de corte';
     sangriaSubtext = (medidaInterna ? 'Medida final tras corte: <strong>' + medidaInterna + '</strong>. ' : '') + 'Sin sangría — recomendado agregar 3mm de fondo extra para evitar bordes blancos si la cuchilla se desplaza.';
   } else if (sangria && !tieneCruces) {
-    // Caso bueno: sangría sin marcas
-    sangriaPill = 'Apto'; sangriaPillClass = 'p-ok';
-    sangriaTitle = 'Con sangría';
-    sangriaSubtext = 'Tu diseño no se cortará en el borde';
+    // Sangría sin marcas válidas
+    if (usoRectanguloInvalido) {
+      // El usuario marcó con un rectángulo (no válido) y SI hay sangría detrás
+      sangriaPill = 'Revisar'; sangriaPillClass = 'p-wn';
+      sangriaTitle = 'Con sangría, falta corte válido';
+      sangriaSubtext = 'Tienes sangría — el fondo se extiende fuera del rectángulo.';
+    } else {
+      // Sangría detectada sin rectángulo ni cruces (caso raro)
+      sangriaPill = 'Apto'; sangriaPillClass = 'p-ok';
+      sangriaTitle = 'Con sangría';
+      sangriaSubtext = 'Tu diseño no se cortará en el borde';
+    }
   } else {
-    // Caso problema: ni sangría ni marcas
-    sangriaPill = 'Falta'; sangriaPillClass = 'p-er';
-    sangriaTitle = 'Sin sangría ni cortes';
-    sangriaSubtext = 'Agrega 3mm de fondo extra y marcas de corte para impresión profesional';
+    // Sin sangría ni cortes válidos
+    if (usoRectanguloInvalido) {
+      // Usó rectángulo pero el fondo no se extiende
+      sangriaPill = 'Falta'; sangriaPillClass = 'p-er';
+      sangriaTitle = 'Sin sangría ni corte válido';
+      sangriaSubtext = 'Tu diseño termina justo en el rectángulo. Agrega 3mm de fondo extra fuera del área de corte.';
+    } else {
+      sangriaPill = 'Falta'; sangriaPillClass = 'p-er';
+      sangriaTitle = 'Sin sangría ni cortes';
+      sangriaSubtext = 'Agrega 3mm de fondo extra y marcas de corte para impresión profesional';
+    }
+  }
+
+  // ⛔ DISCLAIMER FIRME: el rectángulo NO es una marca de corte válida
+  if (usoRectanguloInvalido) {
+    sangriaSubtext += '<br><br><span style="color:#a32d2d;font-weight:600">⛔ El rectángulo que dibujaste alrededor del diseño <strong>no es una marca de corte válida</strong>.</span><br><span style="color:#5a3a0a">Las imprentas profesionales no aceptan rectángulos como guía de corte porque generan ambigüedad (la cuchilla puede cortar sobre la línea, por dentro o por fuera). Las marcas válidas son <strong>cruces, tics o esquinas en L ubicadas FUERA del diseño</strong>, separadas del arte por un margen blanco. Reemplaza el rectángulo por cruces de corte estándar antes de enviar a producción.</span>';
+  }
+
+  // Marco decorativo INTERNO (no es rectángulo de corte, es algo dentro del diseño)
+  if (marcaDecorativa && !tieneCruces && !usoRectanguloInvalido) {
+    sangriaSubtext += '<br><br><span style="color:#8a5500;font-weight:500">⚠️ Detectamos un rectángulo o marco dentro del diseño que <strong>no funciona como línea de corte</strong>. Las marcas de corte profesionales son cruces o tics ubicados <em>fuera</em> del área del diseño, no marcos decorativos dentro del arte.</span>';
   }
 
   html += '<div class="card"><div class="c-head"><span class="c-label">Sangría / Corte</span><span class="c-pill ' + sangriaPillClass + '">' + sangriaPill + '</span></div><div class="c-val">' + sangriaTitle + '</div><div class="c-sub">' + sangriaSubtext + '</div></div>';
@@ -1068,7 +1096,7 @@ async function handleAnalysis(req, res) {
     let ctx = "";
     if (cmAncho && cmAlto) ctx = "Medidas: " + cmAncho + "x" + cmAlto + " cm" + (dpiMeta ? ", DPI: " + dpiMeta : "") + ".";
 
-    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. DETECCION DE SANGRIA — OBLIGATORIO: examina si el fondo del diseño (colores, imagenes, patrones) se EXTIENDE MAS ALLA del rectangulo o lineas de corte. Si el fondo sobrepasa visiblemente el area de corte (incluso unos pocos milimetros), entonces SI HAY SANGRIA. Solo marca sangria.tiene=false cuando el contenido termina exactamente en el borde del rectangulo de corte sin extenderse. La sangria es facil de detectar: busca color de fondo que sigue mas alla de las marcas. EVALUACION VISUAL DE NITIDEZ — OBLIGATORIO: examina la imagen como lo haria un operador de imprenta profesional con vista experta. Aplica este checklist visual estricto: (1) Los bordes de las letras: SI se ven con halo, dientes de sierra, anti-aliasing visible o borrosidad → calidad_visual=BAJA. SOLO si las letras se ven con bordes perfectamente limpios y crujientes → ALTA. (2) Los iconos/dibujos: SI tienen lineas suaves, blur, contornos no nitidos → BAJA. (3) Texturas y degradados: SI tienen bandas, posterizacion, o pixelacion visible → BAJA. (4) Compresion JPEG: SI hay artefactos de bloque (cuadritos de 8x8) cerca de bordes contrastantes → BAJA. REGLA DE ORO: si tuvieras que imprimir esta imagen en una imprenta digital profesional y mostrarla a un cliente exigente, ¿la aceptarias? Si la respuesta es NO o TENGO DUDAS, marca BAJA. Una tarjeta de visita estandar bien hecha tiene textos COMPLETAMENTE nitidos sin halo. Solo se marca ALTA cuando claramente la imagen es de calidad profesional impecable. PDFs profesionales con texto vectorial: solo aplican como ALTA si los textos son verdaderamente vectoriales (perfectamente nitidos a cualquier zoom). Si parece JPG dentro de un PDF, evaluar como JPG. Reportar en calidad_visual: alta|media|baja. CRUCES DE CORTE: si tiene cruces, calcula MEDIDA INTERNA en cm en cruces_de_corte.medida_interna_cm ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"medida_interna_cm":null,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_visual":"alta|media|baja","calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
+    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. ⚠️ MARCAS DE CORTE VALIDAS — UNICA DEFINICION: solo se consideran marcas de corte profesionales VALIDAS las CRUCES, TICS o ESQUINAS EN L ubicadas FUERA del area del diseño, separadas del arte por un margen blanco. Es el unico estandar aceptado en imprenta. NO ES MARCA DE CORTE VALIDA: un rectangulo trazado alrededor del diseño (aunque el usuario lo haya puesto con la intencion de indicar el corte). Las imprentas profesionales NO aceptan rectangulos como guia de corte porque generan ambigüedad: la cuchilla puede cortar sobre la linea, por dentro o por fuera. Si el archivo SOLO tiene un rectangulo y NO tiene cruces externas → cruces_de_corte.tiene=FALSE, cruces_de_corte.tipo="rectangulo_invalido", y cruces_de_corte.detalle debe explicar que el rectangulo no es una marca de corte valida. Si tiene cruces clasicas externas → cruces_de_corte.tiene=TRUE y tipo="cruces". DETECCION DE SANGRIA — REGLA CLAVE: la sangria existe cuando el fondo del diseño (colores, ondas, imagenes, patrones) se extiende MAS ALLA del area de corte intencionada. PROCEDIMIENTO: (1) Si hay cruces de corte validas, observa si el fondo sobrepasa la linea imaginaria entre las cruces. (2) Si hay un rectangulo trazado por el usuario (aunque no sea marca valida), USALO COMO REFERENCIA VISUAL para detectar sangria: observa si el fondo se extiende hacia afuera del rectangulo. Si el fondo asoma por fuera del rectangulo (aunque sean pocos milimetros) → sangria.tiene=TRUE. Si el fondo termina exactamente en el rectangulo o antes → sangria.tiene=FALSE. (3) Si NO hay marcas ni rectangulo y es un JPG/PNG donde el fondo llega al borde absoluto del archivo → sangria.tiene=FALSE (no hay margen de seguridad real). El rectangulo del usuario sirve como pista visual para evaluar sangria, pero su existencia NO equivale a tener marcas de corte. RECTANGULO DECORATIVO INTERNO — caso aparte: si el rectangulo NO rodea el perimetro completo y esta dentro del arte como elemento grafico (marco interno, separador entre secciones, linea divisoria vertical), reportalo en cruces_de_corte.marca_decorativa_detectada=TRUE para advertir al usuario que ese marco interno no es una marca de corte. EVALUACION VISUAL DE NITIDEZ — OBLIGATORIO: examina la imagen como lo haria un operador de imprenta profesional con vista experta. Aplica este checklist visual estricto: (1) Los bordes de las letras: SI se ven con halo, dientes de sierra, anti-aliasing visible o borrosidad → calidad_visual=BAJA. SOLO si las letras se ven con bordes perfectamente limpios y crujientes → ALTA. (2) Los iconos/dibujos: SI tienen lineas suaves, blur, contornos no nitidos → BAJA. (3) Texturas y degradados: SI tienen bandas, posterizacion, o pixelacion visible → BAJA. (4) Compresion JPEG: SI hay artefactos de bloque (cuadritos de 8x8) cerca de bordes contrastantes → BAJA. REGLA DE ORO: si tuvieras que imprimir esta imagen en una imprenta digital profesional y mostrarla a un cliente exigente, ¿la aceptarias? Si la respuesta es NO o TENGO DUDAS, marca BAJA. Una tarjeta de visita estandar bien hecha tiene textos COMPLETAMENTE nitidos sin halo. Solo se marca ALTA cuando claramente la imagen es de calidad profesional impecable. PDFs profesionales con texto vectorial: solo aplican como ALTA si los textos son verdaderamente vectoriales (perfectamente nitidos a cualquier zoom). Si parece JPG dentro de un PDF, evaluar como JPG. Reportar en calidad_visual: alta|media|baja. CRUCES DE CORTE: solo si tiene cruces validas, calcula MEDIDA INTERNA en cm en cruces_de_corte.medida_interna_cm ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"tipo":"cruces|rectangulo_invalido|ninguno","medida_interna_cm":null,"marca_decorativa_detectada":false,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_visual":"alta|media|baja","calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
 
     let userContent;
     if (esVisual || esPDF) {
