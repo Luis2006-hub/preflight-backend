@@ -799,8 +799,8 @@ function showResults(d) {
     }
 
     tamCardHTML = '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div>'
-      + '<div class="size-block"><div class="size-row"><span class="size-key">Archivo:</span><span class="size-val">' + cmW + ' × ' + cmH + ' cm</span></div>'
-      + '<div class="size-row size-row-target"><span class="size-key">A imprimir:</span><span class="size-val size-val-target">' + targetSize.w + ' × ' + targetSize.h + ' cm</span></div></div>'
+      + '<div class="size-block"><div class="size-row"><span class="size-key">Tamaño original:</span><span class="size-val">' + cmW + ' × ' + cmH + ' cm</span></div>'
+      + '<div class="size-row size-row-target"><span class="size-key">Tamaño requerido:</span><span class="size-val size-val-target">' + targetSize.w + ' × ' + targetSize.h + ' cm</span></div></div>'
       + '<div class="c-sub">' + comparacion + '</div></div>';
   } else {
     tamCardHTML = '<div class="card"><div class="c-head"><span class="c-label">Tamaño</span></div><div class="c-val">' + tamLabel + '</div><div class="c-sub">' + tamRef + '</div></div>';
