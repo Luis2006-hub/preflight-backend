@@ -81,6 +81,11 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 .cust-hint{font-size:12px;color:#6b7088;text-align:center;display:block;margin-top:4px;font-style:italic;line-height:1.5;}
 
 .acts{display:flex;gap:10px;flex-wrap:wrap;}
+.bt:disabled,.bt-pr:disabled{background:#ececec !important;color:#9ba0b5 !important;border-color:#d3d1c7 !important;cursor:not-allowed;box-shadow:none !important;transform:none !important;}
+.bt:disabled:hover,.bt-pr:disabled:hover{background:#ececec !important;color:#9ba0b5 !important;border-color:#d3d1c7 !important;box-shadow:none !important;transform:none !important;}
+.skip-row{margin-top:14px;padding-top:14px;border-top:0.5px solid #e3e6f0;text-align:left;}
+.skip-row a{font-size:12px;color:#1a3eb8;text-decoration:none;font-weight:500;}
+.skip-row a:hover{text-decoration:underline;}
 .bt{padding:11px 20px;border-radius:8px;border:1px solid #c5cad9;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#1a1d2e;font-family:inherit;transition:all 0.15s;}
 .bt:not(.bt-pr):hover{background:#f5f6f9;border-color:#1a3eb8;color:#1a3eb8;}
 .bt-pr{background:linear-gradient(135deg,#22d3ee 0%,#3b82f6 35%,#4f46e5 65%,#7c3aed 100%);color:white;border-color:#3b82f6;box-shadow:0 2px 8px rgba(79,70,229,0.25);}
@@ -193,8 +198,11 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
       <span class="cust-hint">Ingresa solo una medida, la otra se calcula automáticamente respetando las proporciones del archivo</span>
     </div>
     <div class="acts">
-      <button class="bt bt-pr" id="btn-analyze">Analizar archivo</button>
+      <button class="bt bt-pr" id="btn-analyze" disabled>Analizar archivo</button>
       <button class="bt" id="btn-change-file">Seleccionar otro archivo</button>
+    </div>
+    <div class="skip-row">
+      <a href="#" id="btn-skip-size">No sé el tamaño todavía, analizar de todos modos →</a>
     </div>
   </div>
 
@@ -269,10 +277,22 @@ function init() {
     resetAll();
     document.getElementById('fi').click();
   });
+  document.getElementById('btn-skip-size').addEventListener('click', e => {
+    e.preventDefault();
+    skipSize();
+  });
 
   // Auto-calcular medida proporcional cuando el usuario ingresa una sola
   const cwInput = document.getElementById('cw');
   const chInput = document.getElementById('ch');
+
+  // Habilitar/deshabilitar botón Analizar según si hay alguna medida ingresada
+  function updateAnalyzeButton() {
+    const w = parseFloat(cwInput.value);
+    const h = parseFloat(chInput.value);
+    const hasSize = (w > 0) || (h > 0);
+    document.getElementById('btn-analyze').disabled = !hasSize;
+  }
 
   function getAspectRatio() {
     // Usar la proporción real del archivo (ancho/alto)
@@ -291,6 +311,7 @@ function init() {
       // Quitar selección de presets si los hay
       document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
     }
+    updateAnalyzeButton();
   });
 
   chInput.addEventListener('input', () => {
@@ -301,6 +322,7 @@ function init() {
       cwInput.value = (h * ratio).toFixed(1);
       document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
     }
+    updateAnalyzeButton();
   });
 }
 
@@ -935,6 +957,8 @@ function resetAll() {
   document.querySelectorAll('.preset').forEach(b => b.classList.remove('active'));
   document.getElementById('cw').value = '';
   document.getElementById('ch').value = '';
+  const btnAn = document.getElementById('btn-analyze');
+  if (btnAn) btnAn.disabled = true;
   curFile = null; curPxW = null; curPxH = null; curDPI = null;
   curMmW = null; curMmH = null; curCmW = null; curCmH = null;
   targetSize = null; curPages = 1;
