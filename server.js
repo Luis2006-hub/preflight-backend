@@ -29,7 +29,8 @@ app.get("/widget", (req, res) => {
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;min-height:100vh;}
 
-.tk-hdr{background:white;border-bottom:1px solid #e3e6f0;padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.tk-hdr{background:linear-gradient(135deg,#ecfeff 0%,#eff6ff 50%,#eef2ff 100%);border-bottom:1px solid #d8e8f0;padding:12px 20px;}
+.tk-hdr-inner{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:12px;}
 .tk-logo-circ{width:36px;height:36px;border-radius:50%;flex-shrink:0;}
 .tk-prod{display:flex;flex-direction:column;}
 .tk-prod-name{font-size:14px;font-weight:600;color:#1a1d2e;letter-spacing:-0.01em;}
@@ -153,17 +154,35 @@ body{font-family:'Inter',sans-serif;background:#f5f6f9;padding:0;color:#1a1d2e;m
 
 footer.tk-foot{text-align:center;padding:1.5rem 1rem;font-size:11px;color:#9ba0b5;}
 footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
+
+.splash{position:fixed;inset:0;background:linear-gradient(135deg,#ecfeff 0%,#eff6ff 50%,#eef2ff 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:9999;animation:splashShow 2.3s ease-in-out forwards;}
+.splash-logo{width:88px;height:88px;border-radius:50%;box-shadow:0 8px 28px rgba(79,70,229,0.18);animation:splashLogoIn 0.6s ease-out;}
+.splash-name{font-size:26px;font-weight:600;color:#1a1d2e;letter-spacing:-0.02em;animation:splashTextIn 0.6s ease-out 0.15s both;}
+.splash-ver{font-size:11px;color:#6b7088;text-transform:uppercase;letter-spacing:0.12em;margin-top:-12px;animation:splashTextIn 0.6s ease-out 0.25s both;}
+.splash-by{position:absolute;bottom:28px;font-size:11px;color:#9ba0b5;letter-spacing:0.05em;animation:splashTextIn 0.6s ease-out 0.4s both;}
+@keyframes splashShow{0%{opacity:0;}15%{opacity:1;}80%{opacity:1;}100%{opacity:0;visibility:hidden;pointer-events:none;}}
+@keyframes splashLogoIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
+@keyframes splashTextIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
 
+<div class="splash" id="splash">
+  <img src="${LOGO_CIRC_LARGE}" alt="Tekkrom" class="splash-logo">
+  <div class="splash-name">Preflight Pro</div>
+  <div class="splash-ver">Versión 1.1</div>
+  <div class="splash-by">Tekkrom Servicios Gráficos</div>
+</div>
+
 <header class="tk-hdr">
-  <img src="${LOGO_CIRC}" alt="Tekkrom" class="tk-logo-circ">
-  <div class="tk-prod">
-    <div class="tk-prod-name">Preflight Pro</div>
-    <div class="tk-prod-sub">Tekkrom · Análisis técnico para imprenta</div>
+  <div class="tk-hdr-inner">
+    <img src="${LOGO_CIRC}" alt="Tekkrom" class="tk-logo-circ">
+    <div class="tk-prod">
+      <div class="tk-prod-name">Preflight Pro</div>
+      <div class="tk-prod-sub">Tekkrom · Análisis técnico para imprenta</div>
+    </div>
+    <div class="tk-tag">v1.1</div>
   </div>
-  <div class="tk-tag">v6.0</div>
 </header>
 
 <div class="app">
@@ -1077,6 +1096,12 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+// Remover splash del DOM después de la animación para liberar recursos
+setTimeout(() => {
+  const sp = document.getElementById('splash');
+  if (sp) sp.remove();
+}, 2400);
 </script>
 </body>
 </html>`;
