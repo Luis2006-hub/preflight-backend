@@ -167,26 +167,9 @@ body{font-family:'Inter',-apple-system,'SF Pro Display','Segoe UI',sans-serif;ba
 footer.tk-foot{text-align:center;padding:2rem 1rem 1.5rem;font-size:11px;color:#94a3b8;}
 footer.tk-foot a{color:#0033cb;text-decoration:none;font-weight:500;}
 footer.tk-foot a:hover{text-decoration:underline;}
-
-/* ===== SPLASH SCREEN ===== */
-.splash{position:fixed;inset:0;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:9999;animation:splashShow 2.3s ease-in-out forwards;}
-.splash-logo{width:96px;height:96px;animation:splashLogoIn 0.6s ease-out;}
-.splash-name{font-size:28px;font-weight:600;color:#0f172a;letter-spacing:-0.025em;animation:splashTextIn 0.6s ease-out 0.15s both;}
-.splash-ver{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.14em;margin-top:-12px;animation:splashTextIn 0.6s ease-out 0.25s both;font-weight:500;}
-.splash-by{position:absolute;bottom:32px;font-size:11px;color:#94a3b8;letter-spacing:0.05em;animation:splashTextIn 0.6s ease-out 0.4s both;}
-@keyframes splashShow{0%{opacity:0;}15%{opacity:1;}80%{opacity:1;}100%{opacity:0;visibility:hidden;pointer-events:none;}}
-@keyframes splashLogoIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
-@keyframes splashTextIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
-
-<div class="splash" id="splash">
-  <img src="${LOGO_CIRC_LARGE}" alt="Tekkrom" class="splash-logo">
-  <div class="splash-name">Preflight Pro</div>
-  <div class="splash-ver">Versión 1.1</div>
-  <div class="splash-by">Tekkrom Servicios Gráficos</div>
-</div>
 
 <header class="tk-hdr">
   <div class="tk-hdr-inner">
@@ -1102,12 +1085,6 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
-
-// Remover splash del DOM después de la animación para liberar recursos
-setTimeout(() => {
-  const sp = document.getElementById('splash');
-  if (sp) sp.remove();
-}, 2400);
 </script>
 </body>
 </html>`;
