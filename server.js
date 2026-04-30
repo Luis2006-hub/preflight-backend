@@ -32,7 +32,7 @@ body{font-family:'Inter',-apple-system,'SF Pro Display','Segoe UI',sans-serif;ba
 /* ===== HEADER ===== */
 .tk-hdr{background:white;border-bottom:1px solid #eaecef;padding:14px 20px;position:sticky;top:0;z-index:50;}
 .tk-hdr-inner{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:12px;}
-.tk-logo-circ{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:block;}
+.tk-logo-circ{width:34px;height:34px;flex-shrink:0;display:block;object-fit:contain;}
 .tk-prod{display:flex;flex-direction:column;}
 .tk-prod-name{font-size:14px;font-weight:600;color:#0f172a;letter-spacing:-0.01em;}
 .tk-prod-sub{font-size:11px;color:#64748b;margin-top:1px;}
@@ -40,11 +40,20 @@ body{font-family:'Inter',-apple-system,'SF Pro Display','Segoe UI',sans-serif;ba
 
 .app{max-width:780px;margin:0 auto;padding:1.5rem 1.25rem 2rem;}
 
+/* ===== HERO EDITORIAL ===== */
+.hero{text-align:center;margin-bottom:24px;padding:8px 0 0;}
+.hero-eyebrow{font-size:11px;color:#0033cb;text-transform:uppercase;letter-spacing:0.14em;font-weight:600;margin-bottom:12px;}
+.hero-title{font-size:28px;font-weight:600;color:#0f172a;letter-spacing:-0.025em;line-height:1.2;margin-bottom:12px;}
+.hero-sub{font-size:13.5px;color:#64748b;line-height:1.55;max-width:440px;margin:0 auto;}
+
 /* ===== DROP ZONE ===== */
-.drop{border:1.5px dashed #cbd5e1;border-radius:14px;padding:3rem 2rem;text-align:center;cursor:pointer;background:white;transition:all 0.15s ease;}
-.drop:hover,.drop.over{border-color:#0033cb;background:#f5f8ff;}
-.drop-ico{width:54px;height:54px;background:#f1f5f9;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;transition:all 0.15s;}
-.drop:hover .drop-ico,.drop.over .drop-ico{background:#e0e7ff;}
+.drop{border:1.5px dashed #cbd5e1;border-radius:14px;padding:3rem 2rem;text-align:center;cursor:pointer;background:linear-gradient(180deg,white 0%,#f8fafc 100%);position:relative;overflow:hidden;transition:all 0.18s ease;}
+.drop::before{content:"";position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(0,51,203,0.08) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+.drop::after{content:"";position:absolute;bottom:-60px;left:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(110,42,219,0.06) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+.drop:hover,.drop.over{border-color:#0033cb;background:linear-gradient(180deg,#f5f8ff 0%,#eef2ff 100%);}
+.drop > *{position:relative;}
+.drop-ico{width:60px;height:60px;background:white;border:1px solid #eaecef;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;transition:all 0.15s;}
+.drop:hover .drop-ico,.drop.over .drop-ico{border-color:#0033cb;}
 .drop-t{font-size:15px;font-weight:600;color:#0f172a;margin-bottom:5px;}
 .drop-h{font-size:13px;color:#64748b;}
 .drop-f{font-size:10px;color:#94a3b8;margin-top:14px;text-transform:uppercase;letter-spacing:0.06em;font-weight:500;}
@@ -170,7 +179,7 @@ footer.tk-foot a:hover{text-decoration:underline;}
 
 /* ===== SPLASH SCREEN ===== */
 .splash{position:fixed;inset:0;background:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:9999;animation:splashShow 2.3s ease-in-out forwards;}
-.splash-logo{width:96px;height:96px;border-radius:50%;animation:splashLogoIn 0.6s ease-out;}
+.splash-logo{width:96px;height:96px;animation:splashLogoIn 0.6s ease-out;object-fit:contain;}
 .splash-name{font-size:28px;font-weight:600;color:#0f172a;letter-spacing:-0.025em;animation:splashTextIn 0.6s ease-out 0.15s both;}
 .splash-ver{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.14em;margin-top:-12px;animation:splashTextIn 0.6s ease-out 0.25s both;font-weight:500;}
 .splash-by{position:absolute;bottom:32px;font-size:11px;color:#94a3b8;letter-spacing:0.05em;animation:splashTextIn 0.6s ease-out 0.4s both;}
@@ -201,6 +210,11 @@ footer.tk-foot a:hover{text-decoration:underline;}
 
 <div class="app">
   <div id="dropbox">
+    <div class="hero">
+      <div class="hero-eyebrow">Preflight Tool</div>
+      <h1 class="hero-title">Revisa tus archivos<br>antes de imprimir</h1>
+      <p class="hero-sub">Análisis técnico instantáneo de calidad, sangría, color y tamaño óptimo de impresión.</p>
+    </div>
     <div class="drop" id="drop">
       <div class="drop-ico"><svg width="24" height="24" viewBox="0 0 26 26" fill="none"><path d="M13 4v14M9 10l4-6 4 6" stroke="#0033cb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 19v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke="#0033cb" stroke-width="2" stroke-linecap="round"/></svg></div>
       <div class="drop-t">Sube tu archivo de imprenta</div>
