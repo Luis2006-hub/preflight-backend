@@ -97,10 +97,6 @@ body{font-family:'Inter',-apple-system,'SF Pro Display','Segoe UI',sans-serif;ba
 .bt:disabled,.bt-pr:disabled{background:#e2e8f0 !important;color:#94a3b8 !important;border-color:#e2e8f0 !important;cursor:not-allowed;}
 .bt:disabled:hover,.bt-pr:disabled:hover{background:#e2e8f0 !important;color:#94a3b8 !important;border-color:#e2e8f0 !important;}
 
-.skip-row{margin-top:14px;padding-top:14px;border-top:1px solid #eaecef;text-align:left;}
-.skip-row a{font-size:12px;color:#0033cb;text-decoration:none;font-weight:500;}
-.skip-row a:hover{text-decoration:underline;}
-
 /* ===== ANALYZING ===== */
 .anz{background:white;border:1px solid #eaecef;border-radius:14px;padding:3.5rem 1.5rem;text-align:center;}
 .big-spinner{position:relative;width:110px;height:110px;margin:0 auto 1.5rem;}
@@ -247,9 +243,7 @@ footer.tk-foot a:hover{text-decoration:underline;}
     <div class="acts">
       <button class="bt bt-pr" id="btn-analyze" disabled>Analizar archivo</button>
       <button class="bt" id="btn-change-file">Seleccionar otro archivo</button>
-    </div>
-    <div class="skip-row">
-      <a href="#" id="btn-skip-size">No sé el tamaño todavía, analizar de todos modos →</a>
+      <button class="bt" id="btn-skip-size">No sé el tamaño todavía</button>
     </div>
   </div>
 
@@ -316,10 +310,7 @@ function init() {
     resetAll();
     document.getElementById('fi').click();
   });
-  document.getElementById('btn-skip-size').addEventListener('click', e => {
-    e.preventDefault();
-    skipSize();
-  });
+  document.getElementById('btn-skip-size').addEventListener('click', skipSize);
 
   // Auto-calcular medida proporcional cuando el usuario ingresa una sola
   const cwInput = document.getElementById('cw');
