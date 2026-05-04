@@ -793,7 +793,7 @@ function showResults(d) {
   } else if (calidadVisualIA === 'baja') {
     calLabel = 'Baja'; calStatus = 'p-er';
     calDetail = 'Imagen visualmente pixelada o borrosa' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
-  } else if (calidadVisualIA === 'media' && calidadDPI && calidadDPI < 150) {
+  } else if (calidadVisualIA === 'media') {
     calLabel = 'Media'; calStatus = 'p-wn';
     calDetail = 'Algo de pixelación visible' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
   } else if (curExt === 'pdf' && !dpi) {
