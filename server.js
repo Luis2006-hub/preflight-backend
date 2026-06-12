@@ -15,7 +15,7 @@ const ICON_512 = "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAADAFBMVEUhHqNZE5
 const ICON_512_MASK = "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";
 
 app.get("/", (req, res) => {
-  res.json({ status: "Preflight Pro v7.1 (Tekkrom) activo" });
+  res.json({ status: "Preflight Pro v7.2 (Tekkrom) activo" });
 });
 
 app.get("/manifest.json", (req, res) => {
@@ -229,7 +229,7 @@ footer.tk-foot a{color:#1a3eb8;text-decoration:none;font-weight:500;}
     <div class="tk-prod-name">Preflight Pro</div>
     <div class="tk-prod-sub">Tekkrom · Análisis técnico para imprenta</div>
   </div>
-  <div class="tk-tag">v7.1</div>
+  <div class="tk-tag">v7.2</div>
   <button class="tk-install" id="tk-install"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11v1a1 1 0 001 1h8a1 1 0 001-1v-1" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>Instalar app</button>
 </header>
 
@@ -772,9 +772,11 @@ async function startAnalysis() {
   step(55, 'Enviando a IA para análisis preflight...');
 
   try {
-    let vista = null;
-    try { vista = await makeAnalysisPreview(); }
+    let evid = null;
+    try { evid = await makeAnalysisPreview(); }
     catch (e) { console.warn('vista previa para IA:', e); }
+    const vista = evid && evid.vista;
+    const detalle = evid && evid.detalle;
 
     const LIMITE_ORIGINAL = 4 * 1024 * 1024;
     const mandarOriginal = curFile.size <= LIMITE_ORIGINAL || !vista;
@@ -784,6 +786,7 @@ async function startAnalysis() {
     else fd.append('archivo_nombre', curFile.name);
     fd.append('ext', curExt);
     if (vista) fd.append('vista', vista, 'vista.jpg');
+    if (detalle) fd.append('detalle', detalle, 'detalle.jpg');
     if (curPxW) fd.append('px_ancho', curPxW);
     if (curPxH) fd.append('px_alto', curPxH);
     if (curDPI) fd.append('dpi_meta', curDPI);
@@ -884,68 +887,131 @@ async function renderPrev() {
   }
 }
 
-async function makeAnalysisPreview() {
+function cargarImagen(url) {
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => res(im);
+    im.onerror = rej;
+    im.src = url;
+  });
+}
+
+function blobJPEG(canvas, q) {
+  return new Promise(res => canvas.toBlob(res, 'image/jpeg', q));
+}
+
+// Encuentra la zona con mas detalle (bordes, texto) para hacer el recorte al 100%
+function zonaMasDetallada(srcCanvas) {
+  try {
+    const A = 128;
+    const an = document.createElement('canvas');
+    const f = A / Math.max(srcCanvas.width, srcCanvas.height);
+    an.width = Math.max(12, Math.round(srcCanvas.width * f));
+    an.height = Math.max(12, Math.round(srcCanvas.height * f));
+    const cx = an.getContext('2d');
+    cx.drawImage(srcCanvas, 0, 0, an.width, an.height);
+    const data = cx.getImageData(0, 0, an.width, an.height).data;
+    const GRID = 6;
+    const cw = an.width / GRID, ch = an.height / GRID;
+    let best = { gx: GRID / 2, gy: GRID / 2, v: -1 };
+    for (let gy = 0; gy < GRID; gy++) {
+      for (let gx = 0; gx < GRID; gx++) {
+        let v = 0;
+        const x0 = Math.floor(gx * cw), x1 = Math.floor((gx + 1) * cw) - 1;
+        const y0 = Math.floor(gy * ch), y1 = Math.floor((gy + 1) * ch) - 1;
+        for (let y = y0; y < y1; y++) {
+          for (let x = x0; x < x1; x++) {
+            const i = (y * an.width + x) * 4;
+            const l1 = data[i] + data[i + 1] + data[i + 2];
+            const l2 = data[i + 4] + data[i + 5] + data[i + 6];
+            const l3 = data[i + an.width * 4] + data[i + an.width * 4 + 1] + data[i + an.width * 4 + 2];
+            v += Math.abs(l1 - l2) + Math.abs(l1 - l3);
+          }
+        }
+        if (v > best.v) best = { gx: gx, gy: gy, v: v };
+      }
+    }
+    return { x: (best.gx + 0.5) / GRID, y: (best.gy + 0.5) / GRID };
+  } catch (e) {
+    return { x: 0.5, y: 0.5 };
+  }
+}
+
+// Recorta una ventana al 100% (1px archivo = 1px imagen) centrada en la zona con mas detalle
+function recorteDetalle(srcCanvas) {
+  const LADO = 700;
+  if (srcCanvas.width <= LADO && srcCanvas.height <= LADO) return srcCanvas;
+  const z = zonaMasDetallada(srcCanvas);
+  const w = Math.min(LADO, srcCanvas.width);
+  const h = Math.min(LADO, srcCanvas.height);
+  let x = Math.round(z.x * srcCanvas.width - w / 2);
+  let y = Math.round(z.y * srcCanvas.height - h / 2);
+  x = Math.max(0, Math.min(srcCanvas.width - w, x));
+  y = Math.max(0, Math.min(srcCanvas.height - h, y));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(srcCanvas, x, y, w, h, 0, 0, w, h);
+  return c;
+}
+
+// Canvas con el contenido del archivo a la mayor resolucion disponible
+async function fuenteAltaRes() {
   let srcURL = null;
+  const isImgFmt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'].includes(curExt);
   if (curExt === 'tif' || curExt === 'tiff') srcURL = window._tiffPreviewURL;
   else if (curExt === 'psd') srcURL = window._psdPreviewURL;
   else if (curExt === 'svg') srcURL = curURL;
-  if (srcURL) {
-    try {
-      const img = await new Promise((res, rej) => {
-        const im = new Image();
-        im.onload = () => res(im);
-        im.onerror = rej;
-        im.src = srcURL;
-      });
-      const MAXD = 2000;
-      let w = img.naturalWidth, h = img.naturalHeight;
-      if (!w || !h) return null;
-      const f = Math.min(1, MAXD / Math.max(w, h));
-      w = Math.max(1, Math.round(w * f)); h = Math.max(1, Math.round(h * f));
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      const cx = c.getContext('2d');
-      cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h);
-      cx.drawImage(img, 0, 0, w, h);
-      return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
-    } catch (e) { console.warn('makeAnalysisPreview img:', e); return null; }
+  else if (isImgFmt) {
+    if (!curURL) curURL = URL.createObjectURL(curFile);
+    srcURL = curURL;
   }
-  const isImgFmt = ['png','jpg','jpeg','gif','bmp','webp'].includes(curExt);
-  if (isImgFmt && curURL) {
-    try {
-      const img = await new Promise((res, rej) => {
-        const im = new Image();
-        im.onload = () => res(im); im.onerror = rej; im.src = curURL;
-      });
-      const MAXD = 2000;
-      let w = img.naturalWidth, h = img.naturalHeight;
-      if (!w || !h) return null;
-      const f = Math.min(1, MAXD / Math.max(w, h));
-      w = Math.max(1, Math.round(w * f)); h = Math.max(1, Math.round(h * f));
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      const cx = c.getContext('2d');
-      cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, w, h);
-      cx.drawImage(img, 0, 0, w, h);
-      return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
-    } catch (e) { console.warn('makeAnalysisPreview img std:', e); return null; }
+  if (srcURL) {
+    const img = await cargarImagen(srcURL);
+    if (!img.naturalWidth || !img.naturalHeight) return null;
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, c.width, c.height);
+    cx.drawImage(img, 0, 0);
+    return c;
   }
   if ((curExt === 'pdf' || curExt === 'ai' || curExt === 'eps') && window._pdfDoc) {
-    try {
-      const page = await window._pdfDoc.getPage(1);
-      const vp1 = page.getViewport({ scale: 1 });
-      const MAXD = 2000;
-      const scale = Math.min(2.5, MAXD / Math.max(vp1.width, vp1.height));
-      const vp = page.getViewport({ scale: Math.max(0.5, scale) });
-      const c = document.createElement('canvas');
-      c.width = vp.width; c.height = vp.height;
-      const cx = c.getContext('2d');
-      cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, vp.width, vp.height);
-      await page.render({ canvasContext: cx, viewport: vp }).promise;
-      return await new Promise(res => c.toBlob(res, 'image/jpeg', 0.85));
-    } catch (e) { console.warn('makeAnalysisPreview pdf:', e); return null; }
+    const page = await window._pdfDoc.getPage(1);
+    const vp1 = page.getViewport({ scale: 1 });
+    const scale = Math.min(4, Math.max(1, 2600 / Math.max(vp1.width, vp1.height)));
+    const vp = page.getViewport({ scale: scale });
+    const c = document.createElement('canvas');
+    c.width = vp.width; c.height = vp.height;
+    const cx = c.getContext('2d');
+    cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, vp.width, vp.height);
+    await page.render({ canvasContext: cx, viewport: vp }).promise;
+    return c;
   }
   return null;
+}
+
+async function makeAnalysisPreview() {
+  try {
+    const fuente = await fuenteAltaRes();
+    if (!fuente) return null;
+    // Vista completa reescalada
+    const MAXV = 1800;
+    const f = Math.min(1, MAXV / Math.max(fuente.width, fuente.height));
+    const vw = Math.max(1, Math.round(fuente.width * f));
+    const vh = Math.max(1, Math.round(fuente.height * f));
+    const vc = document.createElement('canvas');
+    vc.width = vw; vc.height = vh;
+    vc.getContext('2d').drawImage(fuente, 0, 0, vw, vh);
+    const vista = await blobJPEG(vc, 0.9);
+    // Recorte al 100% de la zona con mas detalle (evidencia de nitidez real)
+    let detalle = null;
+    try { detalle = await blobJPEG(recorteDetalle(fuente), 0.92); }
+    catch (e) { console.warn('recorte detalle:', e); }
+    return { vista: vista, detalle: detalle };
+  } catch (e) {
+    console.warn('makeAnalysisPreview:', e);
+    return null;
+  }
 }
 
 async function renderPDFPages() {
@@ -1090,47 +1156,62 @@ function showResults(d) {
   const colorOK = modoColor === 'CMYK';
   const sangria = (d.sangria && d.sangria.tiene) || false;
 
-  let calidadDPI = dpi, targetInfo = '';
+  // DPI confiable: solo metadatos reales del archivo o calculo pixeles/tamano objetivo.
+  // El DPI que reporta la IA puede ser estimado, NUNCA debe producir "Excelente" por si solo.
+  let dpiConfiable = null, targetInfo = '';
   if (targetSize && curPxW && curPxH) {
     const dpiW = Math.round(curPxW / (targetSize.w / 2.54));
     const dpiH = Math.round(curPxH / (targetSize.h / 2.54));
-    calidadDPI = Math.min(dpiW, dpiH);
+    dpiConfiable = Math.min(dpiW, dpiH);
     targetInfo = ' al imprimir en ' + targetSize.w + 'x' + targetSize.h + ' cm';
+  } else if (curDPI) {
+    dpiConfiable = curDPI;
   }
+  const dpiIA = (d.resolucion && d.resolucion.valor_dpi) || null;
+  const calidadDPI = dpiConfiable || dpiIA;
 
-  // Evaluación visual de la IA tiene prioridad sobre el cálculo matemático de DPI
+  // La evaluacion visual de la IA manda sobre cualquier numero
   const calidadVisualIA = (d.calidad_visual || d.calidad_general || '').toLowerCase();
 
   let calLabel, calStatus, calDetail;
 
-  // Si la IA detectó pixelación visual REAL, marcar como problema sin importar el DPI
+  function escalaDPI(v, esEstimado) {
+    const suf = (esEstimado ? ' (~' + v + ' DPI estimado' : ' (' + v + ' DPI') + targetInfo + ')';
+    if (v >= 300) return ['Excelente', 'p-ok', 'Calidad profesional' + suf];
+    if (v >= 200) return ['Alta', 'p-ok', 'Perfecta para imprenta digital' + suf];
+    if (v >= 150) return ['Buena', 'p-ok', 'Apta para imprenta digital' + suf];
+    if (v >= 100) return ['Aceptable', 'p-wn', 'Funciona para flyers y volantes' + suf];
+    if (v >= 72) return ['Limitada', 'p-wn', 'Solo para uso pequeño' + suf];
+    return ['Muy baja', 'p-er', 'No recomendado para imprenta' + suf];
+  }
+
   if (calidadVisualIA === 'baja') {
     calLabel = 'Baja'; calStatus = 'p-er';
-    calDetail = 'Imagen visualmente pixelada o borrosa' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
+    calDetail = 'Pixelación o borrosidad visible en la revisión' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
   } else if (calidadVisualIA === 'media') {
     calLabel = 'Media'; calStatus = 'p-wn';
-    calDetail = 'Algo de pixelación visible' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
-  } else if (curExt === 'pdf' && !dpi) {
-    calLabel = 'Vectorial'; calStatus = 'p-ok';
-    calDetail = 'Calidad perfecta a cualquier tamaño';
-  } else if (calidadDPI >= 300) {
-    calLabel = 'Excelente'; calStatus = 'p-ok';
-    calDetail = 'Calidad profesional (' + calidadDPI + ' DPI' + targetInfo + ')';
-  } else if (calidadDPI >= 200) {
+    calDetail = 'Algo de pixelación visible en la revisión' + (calidadDPI ? ' (' + calidadDPI + ' DPI' + targetInfo + ')' : '');
+  } else if (dpiConfiable) {
+    const r = escalaDPI(dpiConfiable, false);
+    calLabel = r[0]; calStatus = r[1]; calDetail = r[2];
+    if (calidadVisualIA === 'alta' && dpiConfiable >= 150) calDetail += '. Sin defectos en la revisión visual';
+  } else if (curExt === 'pdf') {
+    if (calidadVisualIA === 'alta') {
+      calLabel = 'Alta'; calStatus = 'p-ok';
+      calDetail = 'Texto e imágenes nítidos según la revisión visual';
+    } else {
+      calLabel = 'Vectorial'; calStatus = 'p-ok';
+      calDetail = 'Contenido vectorial: calidad perfecta a cualquier tamaño';
+    }
+  } else if (dpiIA) {
+    const r = escalaDPI(dpiIA, true);
+    calLabel = r[0]; calStatus = r[1]; calDetail = r[2];
+  } else if (calidadVisualIA === 'alta') {
     calLabel = 'Alta'; calStatus = 'p-ok';
-    calDetail = 'Perfecta para imprenta digital (' + calidadDPI + ' DPI' + targetInfo + ')';
-  } else if (calidadDPI >= 150) {
-    calLabel = 'Buena'; calStatus = 'p-ok';
-    calDetail = 'Apta para imprenta digital (' + calidadDPI + ' DPI' + targetInfo + ')';
-  } else if (calidadDPI >= 100) {
-    calLabel = 'Aceptable'; calStatus = 'p-wn';
-    calDetail = 'Funciona para flyers y volantes (' + calidadDPI + ' DPI' + targetInfo + ')';
-  } else if (calidadDPI >= 72) {
-    calLabel = 'Limitada'; calStatus = 'p-wn';
-    calDetail = 'Solo para uso pequeño (' + calidadDPI + ' DPI' + targetInfo + ')';
+    calDetail = 'Sin defectos visibles en la revisión';
   } else {
-    calLabel = 'Muy baja'; calStatus = 'p-er';
-    calDetail = 'No recomendado para imprenta (' + calidadDPI + ' DPI' + targetInfo + ')';
+    calLabel = 'Sin datos'; calStatus = 'p-wn';
+    calDetail = 'No se pudo determinar la calidad; revisar manualmente';
   }
 
   let tamRecomendado = '';
@@ -1141,7 +1222,7 @@ function showResults(d) {
   }
 
   const probs = [];
-  if (calidadDPI && calidadDPI < 100) probs.push('calidad');
+  if ((calidadDPI && calidadDPI < 100) || calidadVisualIA === 'baja') probs.push('calidad');
   if (!colorOK && curExt === 'pdf') probs.push('color');
   if (!sangria && curExt === 'pdf') probs.push('sangria');
 
@@ -1428,7 +1509,7 @@ if (document.readyState === 'loading') {
 });
 
 app.post("/analizar", (req, res, next) => {
-  upload.fields([{ name: "archivo", maxCount: 1 }, { name: "vista", maxCount: 1 }])(req, res, (err) => {
+  upload.fields([{ name: "archivo", maxCount: 1 }, { name: "vista", maxCount: 1 }, { name: "detalle", maxCount: 1 }])(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       if (err.code === "LIMIT_FILE_SIZE") {
         return res.status(413).json({ ok: false, error: "Archivo demasiado grande. Maximo 50 MB." });
@@ -1445,6 +1526,7 @@ async function handleAnalysis(req, res) {
   try {
     const archivoFile = req.files && req.files.archivo && req.files.archivo[0];
     const vista = req.files && req.files.vista && req.files.vista[0];
+    const detalle = req.files && req.files.detalle && req.files.detalle[0];
     if (!archivoFile && !vista) return res.status(400).json({ error: "No se recibió archivo" });
     const originalname = archivoFile ? archivoFile.originalname : (req.body.archivo_nombre || "archivo");
     const mimetype = archivoFile ? archivoFile.mimetype : "application/octet-stream";
@@ -1472,22 +1554,31 @@ async function handleAnalysis(req, res) {
     let ctx = "";
     if (cmAncho && cmAlto) ctx = "Medidas: " + cmAncho + "x" + cmAlto + " cm" + (dpiMeta ? ", DPI: " + dpiMeta : "") + ".";
 
-    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. DETECCION DE SANGRIA — OBLIGATORIO: examina si el fondo del diseño (colores, imagenes, patrones) se EXTIENDE MAS ALLA del rectangulo o lineas de corte. Si el fondo sobrepasa visiblemente el area de corte (incluso unos pocos milimetros), entonces SI HAY SANGRIA. Solo marca sangria.tiene=false cuando el contenido termina exactamente en el borde del rectangulo de corte sin extenderse. La sangria es facil de detectar: busca color de fondo que sigue mas alla de las marcas. EVALUACION VISUAL DE NITIDEZ — OBLIGATORIO: examina la imagen como lo haria un operador de imprenta profesional con vista experta. Aplica este checklist visual estricto: (1) Los bordes de las letras: SI se ven con halo, dientes de sierra, anti-aliasing visible o borrosidad → calidad_visual=BAJA. SOLO si las letras se ven con bordes perfectamente limpios y crujientes → ALTA. (2) Los iconos/dibujos: SI tienen lineas suaves, blur, contornos no nitidos → BAJA. (3) Texturas y degradados: SI tienen bandas, posterizacion, o pixelacion visible → BAJA. (4) Compresion JPEG: SI hay artefactos de bloque (cuadritos de 8x8) cerca de bordes contrastantes → BAJA. REGLA DE ORO: si tuvieras que imprimir esta imagen en una imprenta digital profesional y mostrarla a un cliente exigente, ¿la aceptarias? Si la respuesta es NO o TENGO DUDAS, marca BAJA. Una tarjeta de visita estandar bien hecha tiene textos COMPLETAMENTE nitidos sin halo. Solo se marca ALTA cuando claramente la imagen es de calidad profesional impecable. PDFs profesionales con texto vectorial: solo aplican como ALTA si los textos son verdaderamente vectoriales (perfectamente nitidos a cualquier zoom). Si parece JPG dentro de un PDF, evaluar como JPG. Reportar en calidad_visual: alta|media|baja. CRUCES DE CORTE: si tiene cruces, calcula MEDIDA INTERNA en cm en cruces_de_corte.medida_interna_cm ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"medida_interna_cm":null,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_visual":"alta|media|baja","calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
+    const sys = 'Experto preflight imprenta digital. JSON sin backticks. ' + ctx + ' Analiza modo color, sangria, transparencias. DETECCION DE SANGRIA — OBLIGATORIO: examina si el fondo del diseño (colores, imagenes, patrones) se EXTIENDE MAS ALLA del rectangulo o lineas de corte. Si el fondo sobrepasa visiblemente el area de corte (incluso unos pocos milimetros), entonces SI HAY SANGRIA. Solo marca sangria.tiene=false cuando el contenido termina exactamente en el borde del rectangulo de corte sin extenderse. La sangria es facil de detectar: busca color de fondo que sigue mas alla de las marcas. EVALUACION VISUAL DE NITIDEZ — OBLIGATORIO: examina la imagen como lo haria un operador de imprenta profesional con vista experta. Aplica este checklist visual estricto: (1) Los bordes de las letras: SI se ven con halo, dientes de sierra, anti-aliasing visible o borrosidad → calidad_visual=BAJA. SOLO si las letras se ven con bordes perfectamente limpios y crujientes → ALTA. (2) Los iconos/dibujos: SI tienen lineas suaves, blur, contornos no nitidos → BAJA. (3) Texturas y degradados: SI tienen bandas, posterizacion, o pixelacion visible → BAJA. (4) Compresion JPEG: SI hay artefactos de bloque (cuadritos de 8x8) cerca de bordes contrastantes → BAJA. REGLA DE ORO: si tuvieras que imprimir esta imagen en una imprenta digital profesional y mostrarla a un cliente exigente, ¿la aceptarias? Si la respuesta es NO o TENGO DUDAS, marca BAJA. Una tarjeta de visita estandar bien hecha tiene textos COMPLETAMENTE nitidos sin halo. Solo se marca ALTA cuando claramente la imagen es de calidad profesional impecable. PDFs profesionales con texto vectorial: solo aplican como ALTA si los textos son verdaderamente vectoriales (perfectamente nitidos a cualquier zoom). Si parece JPG dentro de un PDF, evaluar como JPG. Reportar en calidad_visual: alta|media|baja. RECORTE AL 100 POR CIENTO: si se adjunta una segunda imagen marcada como recorte al 100 por ciento (1 pixel del archivo = 1 pixel de la imagen), la evaluacion de nitidez se hace PRINCIPALMENTE en ese recorte; ahi los defectos son evidentes y bordes de letras con escalones, halos o bloques JPEG = BAJA sin excepciones. DPI: PROHIBIDO inventar valor_dpi; si el contexto no entrega un DPI medido, deja valor_dpi en null. CRUCES DE CORTE: si tiene cruces, calcula MEDIDA INTERNA en cm en cruces_de_corte.medida_interna_cm ej "10 x 15 cm". JSON: {"resolucion":{"valor_dpi":' + (dpiMeta || "null") + ',"estado":"ok|advertencia|error","detalle":""},"modo_color":{"valor":"CMYK|RGB|Escala de grises|Desconocido","estado":"ok|advertencia|error","detalle":""},"textos_trazados":{"metodo":"","estado":"ok|advertencia|error|no_determinable","detalle":""},"sangria":{"tiene":false,"valor_mm":null,"estado":"ok|advertencia|error","detalle":""},"cruces_de_corte":{"tiene":false,"medida_interna_cm":null,"estado":"ok|advertencia|error","detalle":""},"tamanio":{"px_ancho":' + (pxAncho || "null") + ',"px_alto":' + (pxAlto || "null") + ',"mm_ancho":' + (mmAncho || "null") + ',"mm_alto":' + (mmAlto || "null") + ',"cm_ancho":' + (cmAncho || "null") + ',"cm_alto":' + (cmAlto || "null") + '},"transparencias":{"tiene":false,"estado":"ok|advertencia|error","detalle":""},"perfil_color_icc":{"tiene":false,"perfil":null,"estado":"ok|advertencia|error","detalle":""},"calidad_visual":"alta|media|baja","calidad_general":"alta|media|baja","problemas_criticos":[],"advertencias":[],"tiempo_estimado":{"total_minutos":0,"desglose":{"correccion_color_min":0,"textos_tipografia_min":0,"sangria_corte_min":0,"resolucion_min":0,"revision_final_min":0},"justificacion":""},"resumen":""}';
+
+    const imgDetalle = (detalle && detalle.buffer)
+      ? { type: "image", source: { type: "base64", media_type: detalle.mimetype || "image/jpeg", data: detalle.buffer.toString("base64") } }
+      : null;
+    const notaDetalle = imgDetalle
+      ? " La ULTIMA imagen adjunta es un RECORTE AL 100 POR CIENTO (1 pixel del archivo = 1 pixel de la imagen) de la zona con mas detalle: usala como evidencia principal para calidad_visual."
+      : "";
 
     let userContent;
     if ((esVisual || esPDF) && base64 && originalAptoApi) {
       const mediaType = esPDF ? "application/pdf" : mimetype;
       const tipo = esPDF ? "document" : "image";
       userContent = [
-        { type: tipo, source: { type: "base64", media_type: mediaType, data: base64 } },
-        { type: "text", text: "Analiza preflight imprenta digital. " + originalname + ". " + ctx + " Solo JSON." }
+        { type: tipo, source: { type: "base64", media_type: mediaType, data: base64 } }
       ];
+      if (imgDetalle) userContent.push(imgDetalle);
+      userContent.push({ type: "text", text: "Analiza preflight imprenta digital. " + originalname + ". " + ctx + notaDetalle + " Solo JSON." });
     } else if (vista && vista.buffer) {
       const vistaB64 = vista.buffer.toString("base64");
       userContent = [
-        { type: "image", source: { type: "base64", media_type: vista.mimetype || "image/jpeg", data: vistaB64 } },
-        { type: "text", text: "Analiza preflight imprenta digital. " + originalname + " (formato " + ext.toUpperCase() + "). La imagen adjunta es una VISTA PREVIA RENDERIZADA del archivo original: evalua sobre ella nitidez, sangria, cruces de corte y apariencia de color con el mismo rigor que un archivo normal. " + ctx + " Solo JSON." }
+        { type: "image", source: { type: "base64", media_type: vista.mimetype || "image/jpeg", data: vistaB64 } }
       ];
+      if (imgDetalle) userContent.push(imgDetalle);
+      userContent.push({ type: "text", text: "Analiza preflight imprenta digital. " + originalname + " (formato " + ext.toUpperCase() + "). La primera imagen es una VISTA PREVIA RENDERIZADA completa del archivo original: evalua sangria, cruces de corte y apariencia de color sobre ella." + notaDetalle + " " + ctx + " Solo JSON." });
     } else if (base64 && (esVisual || esPDF)) {
       const mediaType = esPDF ? "application/pdf" : mimetype;
       const tipo = esPDF ? "document" : "image";
@@ -1547,4 +1638,4 @@ async function handleAnalysis(req, res) {
 }
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Preflight Pro v7.1 (Tekkrom) puerto " + PORT));
+app.listen(PORT, () => console.log("Preflight Pro v7.2 (Tekkrom) puerto " + PORT));
